@@ -21,25 +21,25 @@ import javax.annotation.PreDestroy
 object NlpApiService {
 
     private val log by logger()
-    private val nlpLocation = System.getenv("NLP_LOCATION")
-            ?: throw AssertionError("No CC_VARS environment variable set")
-    private var nlpProcess: Process = startNlpProcess()
+//    private val nlpLocation = System.getenv("NLP_LOCATION")
+//            ?: throw AssertionError("No CC_VARS environment variable set")
+//    private var nlpProcess: Process = startNlpProcess()
 
-    private fun startNlpProcess(): Process {
-        val startCommand = "python $nlpLocation"
-//        return startCommand.runCommand()
+//    private fun startNlpProcess(): Process {
+//        val startCommand = "python $nlpLocation"
+////        return startCommand.runCommand()
+//
+//        return startCommand.createCommandProcess()
+//                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+//                .redirectError(ProcessBuilder.Redirect.INHERIT)
+//                .start()
+//    }
 
-        return startCommand.createCommandProcess()
-                .redirectInput(ProcessBuilder.Redirect.INHERIT)
-                .redirectError(ProcessBuilder.Redirect.INHERIT)
-                .start()
-    }
-
-    @PreDestroy
-    fun destroyNlpProcess() {
-        log.info("Destroying nlp process")
-        if (nlpProcess.isAlive) nlpProcess.destroy()
-    }
+//    @PreDestroy
+//    fun destroyNlpProcess() {
+//        log.info("Destroying nlp process")
+//        if (nlpProcess.isAlive) nlpProcess.destroy()
+//    }
 
 
     fun textToSentences(text: String): TextToSentencesResponse {
