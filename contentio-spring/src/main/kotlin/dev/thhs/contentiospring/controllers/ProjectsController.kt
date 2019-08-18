@@ -1,7 +1,6 @@
 package dev.thhs.contentiospring.controllers
 
 import dev.thhs.contentiospring.models.askreddit.AskredditProject
-import dev.thhs.contentiospring.models.exceptions.InvalidSubmissionUrl
 import dev.thhs.contentiospring.models.reddit.Submission
 import dev.thhs.contentiospring.models.webrequests.InitProjectRequest
 import dev.thhs.contentiospring.models.webrequests.InitProjectResponse
@@ -23,7 +22,7 @@ class ProjectsController(
         val contentService: AskredditContentService
 ) {
 
-    @PostMapping("/initasync")
+    @PostMapping("/init")
     fun initAsyncProject(@RequestBody request: InitProjectRequest): InitProjectResponse {
         return contentService.initProject(request)
     }
@@ -38,7 +37,7 @@ class ProjectsController(
 
     @GetMapping("/{id}/title")
     fun getProjectsPostTitle(@PathVariable id: Long): String {
-        return statementRepo.findPostStatementByProjectId(id).text
+        return statementRepo.findPostStatementByProjectId(id).originalText
     }
 
     @GetMapping("/{id}/submissions")

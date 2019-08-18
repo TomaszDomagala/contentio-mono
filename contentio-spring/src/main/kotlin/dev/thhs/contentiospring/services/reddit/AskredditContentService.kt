@@ -186,7 +186,7 @@ class AskredditContentService(val redditApi: RedditApiService,
     }
 
     suspend fun prepareSentences(statement: Statement): Float {
-        val sentencesData = nlpApi.textToSentences(statement.text)
+        val sentencesData = nlpApi.textToSentences(statement.originalText)
         val estimatedDuration = estimateSpeechDuration(sentencesData.wordCount)
         val sentences = sentencesData.sentences.mapIndexed { index, it ->
             Sentence(statement, index, it.text, it.paragraph)
