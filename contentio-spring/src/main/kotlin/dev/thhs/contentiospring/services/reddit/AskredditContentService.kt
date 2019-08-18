@@ -74,7 +74,8 @@ class AskredditContentService(val redditApi: RedditApiService,
     fun initProject(request: InitProjectRequest, startContentGeneration: Boolean = true): InitProjectResponse {
         val url = request.url
         val postId = redditApi.submissionUrlToId(url)
-        if (projectRepository.findByPostId(postId).isPresent) return InitProjectResponse(false) //TODO use sealed class to represent response
+        if (projectRepository.findByPostId(postId).isPresent)
+            return InitProjectResponse.Failure("Project with this submission id already exist")
 
         log.info("Starting project initiation")
         val projectDir = createTempDir("askredditproject_")
@@ -92,7 +93,7 @@ class AskredditContentService(val redditApi: RedditApiService,
             log.info("Generating content end")
         }
 
-        return InitProjectResponse(true)
+        return InitProjectResponse.Success(project.id)
     }
 
     suspend fun generateContent(project: AskredditProject) = coroutineScope {
@@ -100,18 +101,21 @@ class AskredditContentService(val redditApi: RedditApiService,
         val coreSubmissionRef = redditApi.getSubmissionByUrl(project.url)
         val commentsRoot = coreSubmissionRef.comments(CommentsRequest(sort = CommentSort.TOP, depth = 1))
 
-        val rawSubmissions = Channel<RawSubmission>(capacity = 5)
-        val durationChannel = durationActor()
+        val rawSubmissions = Channel<RawSubmission>(capacity = 1)
+        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.duration }.sum()
+        val durationChannel = durationActor(projectDuration)
 
         repeat(1) {
             projectWorker(project, rawSubmissions, durationChannel)
         }
         rawSubmissions.send(RawSubmission.Post(coreSubmissionRef))
         for (comment in commentsRoot.walkTree()) {
+            if (submissionRepository.findById(comment.subject.id).isPresent) continue
+
             val durationRes = CompletableDeferred<Float>()
             durationChannel.send(DurationMsg.Get(durationRes))
             val duration = durationRes.await()
-            log.info("current duration is $duration")
+            log.info("Current duration is $duration")
             if (project.minDuration <= duration) {
                 rawSubmissions.close()
                 durationChannel.close()
@@ -125,8 +129,8 @@ class AskredditContentService(val redditApi: RedditApiService,
     }
 
 
-    fun CoroutineScope.durationActor() = actor<DurationMsg> {
-        var duration = 0f
+    fun CoroutineScope.durationActor(initDuration: Float = 0f) = actor<DurationMsg> {
+        var duration = initDuration
         for (msg in channel) {
             when (msg) {
                 is DurationMsg.Add -> duration += msg.duration

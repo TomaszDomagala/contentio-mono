@@ -31,10 +31,17 @@ object TextToSpeechService {
         return audioFile
     }
 
-    fun cleanMarkdownText(text: String): String {
+    private fun clearMarkdownText(text: String): String {
         val document = parser.parse(text)
         val html = renderer.render(document)
         return Jsoup.parse(html).text()
+    }
+
+    private fun clearQuotationMarks(text: String): String = text.replace("\"", "")
+
+    fun clearTextForReading(text: String): String {
+        val cleared = clearMarkdownText(text)
+        return clearQuotationMarks(cleared)
     }
 
     fun getAudioFileDuration(audioFile: File): Float {
