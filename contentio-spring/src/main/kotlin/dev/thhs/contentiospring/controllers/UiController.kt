@@ -1,9 +1,11 @@
 package dev.thhs.contentiospring.controllers
 
 import dev.thhs.contentiospring.models.Statement
+import dev.thhs.contentiospring.models.exceptions.NoStatementFound
 import dev.thhs.contentiospring.models.ui.projects.ProjectItem
 import dev.thhs.contentiospring.models.ui.projects.ProjectPage
 import dev.thhs.contentiospring.models.ui.projects.SubmissionListItem
+import dev.thhs.contentiospring.models.ui.submissions.SubmissionDetails
 import dev.thhs.contentiospring.repositories.AskredditProjectRepository
 import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
@@ -44,13 +46,24 @@ class UiController(
         }
         val post = statementRepo.findStatementBySubmissionId(project.postId)
         val submissionItems = submissionRepo.findSubmissionsByProjectId(project.id).map { it ->
-            val statement = it.statement ?: throw AssertionError("Submission must have associated statement")
+            val statement = it.statement ?: throw NoStatementFound()
             val duration = sentenceRepo.findSentencesByStatementSubmissionId(it.id).map { sentence -> sentence.duration }.sum()
             val edited = statement.originalText != statement.editedText
             SubmissionListItem(it.id, it.author, it.score, statement.editedText, duration, edited)
         }
         val projectDuration = submissionItems.map { it.duration }.sum()
         return ResponseEntity.ok(ProjectPage(post.editedText, projectDuration, submissionItems))
+    }
+
+    @GetMapping("submissions/{id}")
+    fun getSubmission(@PathVariable id: String): ResponseEntity<SubmissionDetails> {
+        val submission = try {
+            submissionRepo.findById(id).orElseThrow()
+        } catch (err: NoSuchElementException) {
+            return ResponseEntity.notFound().build()
+        }
+        val statement = submission.statement ?: throw NoStatementFound()
+        return ResponseEntity.ok(SubmissionDetails(submission.id, submission.author, submission.score, statement.originalText, statement.editedText))
     }
 
 }
