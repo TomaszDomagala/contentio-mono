@@ -49,7 +49,8 @@ class UiController(
             val edited = statement.originalText != statement.editedText
             SubmissionListItem(it.id, it.author, it.score, statement.editedText, duration, edited)
         }
-        return ResponseEntity.ok(ProjectPage(post.editedText, submissionItems))
+        val projectDuration = submissionItems.map { it.duration }.sum()
+        return ResponseEntity.ok(ProjectPage(post.editedText, projectDuration, submissionItems))
     }
 
 }

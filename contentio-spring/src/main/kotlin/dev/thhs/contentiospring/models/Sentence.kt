@@ -10,6 +10,7 @@ data class Sentence(
         @JsonIgnore
         val statement: Statement,
 
+        @Column(name = "_index")
         val index: Int,
 
         @Lob

@@ -1,29 +1,15 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { Box, Text, Card } from "rebass";
 import { getProjectsPage } from "../store/projects/actions";
 
 class ProjectListItem extends Component {
-	state = {
-		title: ""
-	};
-
-	componentDidMount() {
-		const id = this.props.project.id;
-		axios
-			.get(`http://192.168.1.11:8080/projects/${id}/title`)
-			.then(({ data }) => {
-				this.setState({ title: data });
-			});
-	}
-
 	render() {
-		const { project } = this.props;
+		const { projectId, title } = this.props;
 		return (
 			<Link
-				to={`/projects/${project.id}`}
+				to={`/projects/${projectId}`}
 				style={{ textDecoration: "none" }}
 			>
 				<Card
@@ -35,7 +21,7 @@ class ProjectListItem extends Component {
 					borderRadius={8}
 				>
 					<Text color="text1">
-						Id: {project.id} {this.state.title}
+						Id: {projectId} {title}
 					</Text>
 				</Card>
 			</Link>
@@ -51,8 +37,12 @@ class ProjectsList extends Component {
 	render() {
 		return (
 			<Box mt={3}>
-				{this.props.projectsPage.content.map(project => (
-					<ProjectListItem key={project.id} project={project} />
+				{this.props.projectsPage.content.map(({ projectId, title }) => (
+					<ProjectListItem
+						key={projectId}
+						projectId={projectId}
+						title={title}
+					/>
 				))}
 			</Box>
 		);

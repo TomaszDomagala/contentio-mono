@@ -88,8 +88,8 @@ class AskredditContentService(val redditApi: RedditApiService,
             log.info("Generate content async process started")
             generateContent(project)
             mediaGenerator.generateMedia(project)
-            log.info("Creating video...")
-            videoService.generateVideo(project)
+//            log.info("Creating video...")
+//            videoService.generateVideo(project)
             log.info("Generating content end")
         }
 

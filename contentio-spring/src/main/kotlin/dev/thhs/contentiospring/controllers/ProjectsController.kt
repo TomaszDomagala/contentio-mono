@@ -27,6 +27,12 @@ class ProjectsController(
         return contentService.initProject(request)
     }
 
+    @GetMapping("")
+    fun getProjects(): List<AskredditProject> {
+        return projectRepo.findAll()
+    }
+
+
     @GetMapping("/page", params = ["page", "size"])
     fun getProjectsPage(
             @RequestParam(value = "page") page: Int,
@@ -34,6 +40,7 @@ class ProjectsController(
     ): Page<AskredditProject> {
         return projectRepo.findAll(PageRequest.of(page, size, Sort.by("id").descending()))
     }
+
 
     @GetMapping("/{id}/title")
     fun getProjectsPostTitle(@PathVariable id: Long): String {

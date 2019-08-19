@@ -15,7 +15,7 @@ export const getProjectsPage = (page, size = 5) => {
   return async dispatch => {
     try {
       const response = await axios.get(
-        "http://192.168.1.11:8080/projects/page",
+        "http://192.168.1.11:8080/ui/projects",
         { params: { page, size } }
       );
 
