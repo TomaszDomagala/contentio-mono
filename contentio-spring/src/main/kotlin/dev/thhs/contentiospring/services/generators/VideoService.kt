@@ -201,7 +201,7 @@ class VideoService(
             submission: Submission,
             sentences: List<Sentence> = sentenceRepository.findSentencesByStatementSubmissionId(submission.id)
     ): Clip.Video {
-        val slides: List<ImgDur> = sentences.map { ImgDur(File(it.slidePath), it.duration) }
+        val slides: List<ImgDur> = sentences.map { ImgDur(File(it.slidePath), it.predictedDuration) }
         val montageDir = submission.createCategorySubmissionDir("Video")
 
         return createVideoFromImages(slides, montageDir, "${submission.id}_slides")

@@ -18,13 +18,20 @@ class ProjectDetails extends Component {
 	}
 
 	render() {
-		const { title, duration, submissions, fetchSubmission } = this.props;
+		const { title, predictedDuration,audioDuration, submissions, fetchSubmission } = this.props;
 		return (
-			<Box mx="auto">
+			<Box
+				mx="auto"
+				style={{
+					maxHeight: "100vh",
+					overflow: "hidden",
+					overflowY: "scroll"
+				}}
+			>
 				<Heading p={1} color="text1">
 					{title}
 				</Heading>
-				{title && <Text p={1}>{duration.toFixed(2)} sec</Text>}
+				{title && <Text p={1}>{predictedDuration.toFixed(2)} sec</Text>}
 				<SubmissionList
 					submissions={submissions}
 					onItemClick={fetchSubmission}
@@ -60,7 +67,7 @@ const SubmissionList = ({ submissions, onItemClick }) => (
 );
 
 const SubmissionItem = props => {
-	const { id, author, score, text, duration } = props.submission;
+	const { id, author, score, text, predictedDuration,audioDuration } = props.submission;
 	return (
 		<Card
 			my={3}
@@ -82,7 +89,7 @@ const SubmissionItem = props => {
 					{score}
 				</Text>
 				<Text mx={2} color="text2" fontSize={1}>
-					{duration.toFixed(2)} sec
+					{predictedDuration.toFixed(2)} sec
 				</Text>
 			</Flex>
 

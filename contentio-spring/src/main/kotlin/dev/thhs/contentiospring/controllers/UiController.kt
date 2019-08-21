@@ -1,6 +1,5 @@
 package dev.thhs.contentiospring.controllers
 
-import dev.thhs.contentiospring.models.Statement
 import dev.thhs.contentiospring.models.exceptions.NoStatementFound
 import dev.thhs.contentiospring.models.ui.projects.ProjectItem
 import dev.thhs.contentiospring.models.ui.projects.ProjectPage
@@ -15,7 +14,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.lang.AssertionError
 
 @RestController
 @RequestMapping("ui")
@@ -47,12 +45,16 @@ class UiController(
         val post = statementRepo.findStatementBySubmissionId(project.postId)
         val submissionItems = submissionRepo.findSubmissionsByProjectId(project.id).map { it ->
             val statement = it.statement ?: throw NoStatementFound()
-            val duration = sentenceRepo.findSentencesByStatementSubmissionId(it.id).map { sentence -> sentence.duration }.sum()
             val edited = statement.originalText != statement.editedText
-            SubmissionListItem(it.id, it.author, it.score, statement.editedText, duration, edited)
+            val durations = sentenceRepo.findSentencesByStatementSubmissionId(it.id)
+                    .map { sentence -> Pair(sentence.predictedDuration, sentence.audioDuration) }
+                    .reduce { acc, next -> Pair(acc.first + next.first, acc.second + next.second) }
+
+            SubmissionListItem(it.id, it.author, it.score, statement.editedText, durations.first, durations.second, edited)
         }
-        val projectDuration = submissionItems.map { it.duration }.sum()
-        return ResponseEntity.ok(ProjectPage(post.editedText, projectDuration, submissionItems))
+        val predictedDuration = submissionItems.map { it.predictedDuration }.sum()
+        val audioDuration = submissionItems.map { it.audioDuration }.sum()
+        return ResponseEntity.ok(ProjectPage(post.editedText, predictedDuration, audioDuration, submissionItems))
     }
 
     @GetMapping("submissions/{id}")

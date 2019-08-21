@@ -102,13 +102,15 @@ class AskredditContentService(val redditApi: RedditApiService,
         val commentsRoot = coreSubmissionRef.comments(CommentsRequest(sort = CommentSort.TOP, depth = 1))
 
         val rawSubmissions = Channel<RawSubmission>(capacity = 1)
-        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.duration }.sum()
+        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.predictedDuration }.sum()
         val durationChannel = durationActor(projectDuration)
 
         repeat(1) {
             projectWorker(project, rawSubmissions, durationChannel)
         }
         rawSubmissions.send(RawSubmission.Post(coreSubmissionRef))
+
+        var durationReached = false
         for (comment in commentsRoot.walkTree()) {
             if (submissionRepository.findById(comment.subject.id).isPresent) continue
 
@@ -119,11 +121,16 @@ class AskredditContentService(val redditApi: RedditApiService,
             if (project.minDuration <= duration) {
                 rawSubmissions.close()
                 durationChannel.close()
+                durationReached = true
                 break
             }
             val rawComment = RawSubmission.Comment(comment)
             rawSubmissions.send(rawComment)
             log.info("Comment send to channel")
+        }
+        if (!durationReached) {
+            project.allCommentsUsed = true
+            projectRepository.save(project)
         }
         log.info("Canceling generator")
     }
@@ -187,12 +194,13 @@ class AskredditContentService(val redditApi: RedditApiService,
 
     suspend fun prepareSentences(statement: Statement): Float {
         val sentencesData = nlpApi.textToSentences(statement.originalText)
-        val estimatedDuration = estimateSpeechDuration(sentencesData.wordCount)
+        val estimatedStatementDuration = estimateSpeechDuration(sentencesData.wordCount)
         val sentences = sentencesData.sentences.mapIndexed { index, it ->
-            Sentence(statement, index, it.text, it.paragraph)
+            val predictedSentenceDuration = estimateSpeechDuration(it.wordCount)
+            Sentence(statement, index, it.text, it.paragraph, predictedSentenceDuration)
         }
         sentenceRepository.saveAll(sentences)
-        return estimatedDuration
+        return estimatedStatementDuration
     }
 
     fun estimateSpeechDuration(wordCount: Int): Float {

@@ -9,8 +9,19 @@ const initialState = {
 export function projectDetailsReducer(state = initialState, action) {
 	switch (action.type) {
 		case SET_DETAILS: {
-			const { title, duration, submissions } = action.details;
-			return { ...state, title, duration, submissions };
+			const {
+				title,
+				predictedDuration,
+				audioDuration,
+				submissions
+			} = action.details;
+			return {
+				...state,
+				title,
+				predictedDuration,
+				audioDuration,
+				submissions
+			};
 		}
 
 		case CLEAR_DETAILS: {

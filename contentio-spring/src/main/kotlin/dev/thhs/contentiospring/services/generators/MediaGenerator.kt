@@ -102,7 +102,7 @@ class MediaGenerator(
             0f
         }
         sentence.audioPath = audioFile.absolutePath
-        sentence.duration = duration
+        sentence.audioDuration = duration
         sentenceRepository.save(sentence)
     }
 

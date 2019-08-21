@@ -12,6 +12,7 @@ data class AskredditProject(
         val postId: String,
         val projectPath: String,
         val minDuration: Int,
+        var allCommentsUsed: Boolean = false,
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = 0
 )

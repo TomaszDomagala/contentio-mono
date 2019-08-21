@@ -11,7 +11,7 @@ class ProjectEditor extends Component {
 		const { projectId } = this.props.match.params;
 		return (
 			<Box bg="background" style={{ minHeight: "100vh" }}>
-				<Flex>
+				<Flex >
 					<Box p={3} width={[1, 2 / 5]}>
 						<ProjectDetails projectId={projectId} />
 					</Box>

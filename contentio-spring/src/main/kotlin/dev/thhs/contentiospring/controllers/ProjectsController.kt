@@ -5,6 +5,7 @@ import dev.thhs.contentiospring.models.reddit.Submission
 import dev.thhs.contentiospring.models.webrequests.InitProjectRequest
 import dev.thhs.contentiospring.models.webrequests.InitProjectResponse
 import dev.thhs.contentiospring.repositories.AskredditProjectRepository
+import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
 import dev.thhs.contentiospring.repositories.SubmissionRepository
 import dev.thhs.contentiospring.services.reddit.AskredditContentService
@@ -19,6 +20,7 @@ class ProjectsController(
         val projectRepo: AskredditProjectRepository,
         val statementRepo: StatementRepository,
         val submissionRepo: SubmissionRepository,
+        val sentenceRepository: SentenceRepository,
         val contentService: AskredditContentService
 ) {
 
@@ -50,6 +52,20 @@ class ProjectsController(
     @GetMapping("/{id}/submissions")
     fun getProjectSubmissions(@PathVariable id: Long): List<Submission> {
         return submissionRepo.findSubmissionsByProjectId(id)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteProject(@PathVariable id: Long): String {
+        val submissions = submissionRepo.findSubmissionsByProjectId(id)
+        val statements = statementRepo.findStatementsBySubmissionProjectId(id)
+        val sentences = sentenceRepository.findSentencesByStatementSubmissionProjectId(id)
+
+        sentenceRepository.deleteAll(sentences)
+        statementRepo.deleteAll(statements)
+        submissionRepo.deleteAll(submissions)
+        projectRepo.deleteById(id)
+
+        return "deleted (?) $id project"
     }
 
 }
