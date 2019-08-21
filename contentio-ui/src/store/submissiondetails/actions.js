@@ -1,12 +1,20 @@
 import axios from "axios";
-import { SET_SUBMISSION, CLEAR_SUBMISSION } from "./types";
+import { SET_SUBMISSION, CLEAR_SUBMISSION, SET_SENTENCES } from "./types";
+import { apiUrl } from "../../utils/urls";
 
-const apiUrl = "http://192.168.1.11:8080";
 
 export const fetchSubmission = id => {
 	return async dispatch => {
-		const { data } = await axios.get(`${apiUrl}/ui/submissions/${id}`);
-		dispatch(setSubmission(data));
+		const submissionReq = axios.get(`${apiUrl}/ui/submissions/${id}`);
+		const sentencesReq = axios.get(
+			`${apiUrl}/ui/submissions/${id}/sentences`
+		);
+		const [submission, sentences] = await Promise.all([
+			submissionReq,
+			sentencesReq
+		]);
+		dispatch(setSubmission(submission.data));
+		dispatch(setSentences(sentences.data));
 	};
 };
 
@@ -17,4 +25,9 @@ export const setSubmission = submission => ({
 
 export const clearSubmission = () => ({
 	type: CLEAR_SUBMISSION
+});
+
+export const setSentences = sentences => ({
+	type: SET_SENTENCES,
+	sentences
 });

@@ -6,6 +6,7 @@ import {
 	fetchSubmission,
 	clearSubmission
 } from "../store/submissiondetails/actions";
+import { formatSec } from "../utils/formatting";
 
 class ProjectDetails extends Component {
 	componentWillUnmount() {
@@ -18,10 +19,18 @@ class ProjectDetails extends Component {
 	}
 
 	render() {
-		const { title, predictedDuration,audioDuration, submissions, fetchSubmission } = this.props;
+		const {
+			title,
+			predictedDuration,
+			audioDuration,
+			submissions,
+			fetchSubmission
+		} = this.props;
+		console.log(predictedDuration);
 		return (
 			<Box
-				mx="auto"
+				p={3}
+				className="no-scroll-bar"
 				style={{
 					maxHeight: "100vh",
 					overflow: "hidden",
@@ -31,7 +40,12 @@ class ProjectDetails extends Component {
 				<Heading p={1} color="text1">
 					{title}
 				</Heading>
-				{title && <Text p={1}>{predictedDuration.toFixed(2)} sec</Text>}
+				<Box p={1}>
+					<Text>
+						Predicted duration {formatSec(predictedDuration)}
+					</Text>
+					<Text>Audio duration {formatSec(audioDuration)}</Text>
+				</Box>
 				<SubmissionList
 					submissions={submissions}
 					onItemClick={fetchSubmission}
@@ -61,13 +75,21 @@ const SubmissionList = ({ submissions, onItemClick }) => (
 				key={submission.id}
 				submission={submission}
 				onClick={() => onItemClick(submission.id)}
+				style={{ cursor: "pointer" }}
 			/>
 		))}
 	</Box>
 );
 
 const SubmissionItem = props => {
-	const { id, author, score, text, predictedDuration,audioDuration } = props.submission;
+	const {
+		id,
+		author,
+		score,
+		text,
+		predictedDuration,
+		audioDuration
+	} = props.submission;
 	return (
 		<Card
 			my={3}
@@ -89,7 +111,7 @@ const SubmissionItem = props => {
 					{score}
 				</Text>
 				<Text mx={2} color="text2" fontSize={1}>
-					{predictedDuration.toFixed(2)} sec
+					{formatSec(predictedDuration)}/{formatSec(audioDuration)}
 				</Text>
 			</Flex>
 

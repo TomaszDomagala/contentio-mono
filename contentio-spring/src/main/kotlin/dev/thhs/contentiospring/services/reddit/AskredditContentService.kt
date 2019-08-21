@@ -102,7 +102,7 @@ class AskredditContentService(val redditApi: RedditApiService,
         val commentsRoot = coreSubmissionRef.comments(CommentsRequest(sort = CommentSort.TOP, depth = 1))
 
         val rawSubmissions = Channel<RawSubmission>(capacity = 1)
-        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.predictedDuration }.sum()
+        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.audioDuration }.sum()
         val durationChannel = durationActor(projectDuration)
 
         repeat(1) {

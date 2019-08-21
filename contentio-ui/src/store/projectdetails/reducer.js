@@ -2,7 +2,8 @@ import { SET_DETAILS, CLEAR_DETAILS } from "./types";
 
 const initialState = {
 	title: "",
-	duration: 0,
+	predictedDuration: 0,
+	audioDuration: 0,
 	submissions: []
 };
 

@@ -1,4 +1,4 @@
-import { SET_SUBMISSION, CLEAR_SUBMISSION } from "./types";
+import { SET_SUBMISSION, CLEAR_SUBMISSION, SET_SENTENCES } from "./types";
 
 const initialState = {
 	selected: false,
@@ -8,7 +8,8 @@ const initialState = {
 		score: 0,
 		originalText: "",
 		editedText: ""
-	}
+	},
+	sentences: []
 };
 
 export function submissionDetailsReducer(state = initialState, action) {
@@ -18,6 +19,9 @@ export function submissionDetailsReducer(state = initialState, action) {
 		}
 		case CLEAR_SUBMISSION: {
 			return { ...state, ...initialState };
+		}
+		case SET_SENTENCES: {
+			return { ...state, sentences: action.sentences };
 		}
 		default: {
 			return state;

@@ -4,16 +4,22 @@ import dev.thhs.contentiospring.models.exceptions.NoStatementFound
 import dev.thhs.contentiospring.models.ui.projects.ProjectItem
 import dev.thhs.contentiospring.models.ui.projects.ProjectPage
 import dev.thhs.contentiospring.models.ui.projects.SubmissionListItem
+import dev.thhs.contentiospring.models.ui.submissions.SentenceDetails
 import dev.thhs.contentiospring.models.ui.submissions.SubmissionDetails
 import dev.thhs.contentiospring.repositories.AskredditProjectRepository
 import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
 import dev.thhs.contentiospring.repositories.SubmissionRepository
+import okhttp3.Response
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.io.File
 
 @RestController
 @RequestMapping("ui")
@@ -66,6 +72,35 @@ class UiController(
         }
         val statement = submission.statement ?: throw NoStatementFound()
         return ResponseEntity.ok(SubmissionDetails(submission.id, submission.author, submission.score, statement.originalText, statement.editedText))
+    }
+
+    @GetMapping("submissions/{id}/sentences")
+    fun getSubmissionSentences(@PathVariable id: String): ResponseEntity<List<SentenceDetails>> {
+        val sentences = sentenceRepo.findSentencesByStatementSubmissionId(id)
+        val details = sentences.map {
+            val isAudioGenerated = File(it.audioPath).exists()
+            val isSlideGenerated = File(it.slidePath).exists()
+            SentenceDetails(it.id, it.text, isAudioGenerated, isSlideGenerated)
+        }
+        return ResponseEntity.ok(details)
+
+    }
+
+    @GetMapping("sentences/{id}/slide")
+    fun getSentenceSlide(@PathVariable id: Long): ResponseEntity<ByteArray> {
+        val sentence = try {
+            sentenceRepo.findById(id).orElseThrow()
+        } catch (err: NoSuchElementException) {
+            return ResponseEntity.notFound().build()
+        }
+        val slideFile = File(sentence.slidePath)
+        if (!slideFile.exists()) return ResponseEntity.noContent().build()
+        val slide: ByteArray = slideFile.inputStream().readAllBytes()
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.IMAGE_PNG
+        headers.contentLength = slide.size.toLong()
+
+        return ResponseEntity(slide, headers, HttpStatus.OK)
     }
 
 }

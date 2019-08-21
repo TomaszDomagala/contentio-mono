@@ -8,3 +8,10 @@ data class SubmissionDetails(
         val originalText: String,
         val editedText: String
 )
+
+data class SentenceDetails(
+        val id: Long,
+        val text: String,
+        val isAudioGenerated: Boolean,
+        val isSlideGenerated: Boolean
+)

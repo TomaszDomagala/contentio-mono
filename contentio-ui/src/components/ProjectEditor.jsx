@@ -12,10 +12,10 @@ class ProjectEditor extends Component {
 		return (
 			<Box bg="background" style={{ minHeight: "100vh" }}>
 				<Flex >
-					<Box p={3} width={[1, 2 / 5]}>
+					<Box  width={[1, 2 / 5]}>
 						<ProjectDetails projectId={projectId} />
 					</Box>
-					<Box p={3} width={[0, 2 / 5]}>
+					<Box width={[0, 2 / 5]}>
 						<SubmissionDetails />
 					</Box>
 				</Flex>
