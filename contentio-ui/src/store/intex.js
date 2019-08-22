@@ -5,15 +5,14 @@ import { connectRouter } from "connected-react-router";
 import { createBrowserHistory } from "history";
 
 import { projectsReducer } from "./projects/reducer";
-import { projectDetailsReducer } from "./projectdetails/reducer";
-import { submissionDetailsReducer } from "./submissiondetails/reducer";
+import { projectViewReducer } from "./projectview/reducer";
+
 export const history = createBrowserHistory();
 
 const rootReducer = combineReducers({
 	router: connectRouter(history),
 	projectsReducer,
-	projectDetailsReducer,
-	submissionDetailsReducer
+	projectViewReducer
 });
 
 function configureStore() {

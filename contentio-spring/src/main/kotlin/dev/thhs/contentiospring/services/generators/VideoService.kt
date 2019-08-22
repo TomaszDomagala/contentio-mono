@@ -58,7 +58,7 @@ class VideoService(
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Default
 
-    suspend fun generateVideo(project: AskredditProject) = coroutineScope {
+    suspend fun generateProjectVideo(project: AskredditProject) = coroutineScope {
         val orderedSubmissions = submissionsOrderInVideo(project)
         val submissionVideos = createSubmissionsVideos(orderedSubmissions)
         val filtered: List<Clip.Video> = submissionVideos.values.toList().filterNotNull()

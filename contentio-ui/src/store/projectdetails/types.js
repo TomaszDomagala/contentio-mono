@@ -1,2 +1,0 @@
-export const SET_DETAILS = "SET_DETAILS"
-export const CLEAR_DETAILS = "CLEAR_DETAILS"

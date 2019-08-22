@@ -1,4 +1,4 @@
-import { SET_DETAILS, CLEAR_DETAILS } from "./types";
+import { SET_PROJECT_DETAILS, CLEAR_PROJECT_DETAILS } from "./types";
 
 const initialState = {
 	title: "",
@@ -7,9 +7,9 @@ const initialState = {
 	submissions: []
 };
 
-export function projectDetailsReducer(state = initialState, action) {
+export function projectViewReducer(state = initialState, action) {
 	switch (action.type) {
-		case SET_DETAILS: {
+		case SET_PROJECT_DETAILS: {
 			const {
 				title,
 				predictedDuration,
@@ -25,7 +25,7 @@ export function projectDetailsReducer(state = initialState, action) {
 			};
 		}
 
-		case CLEAR_DETAILS: {
+		case CLEAR_PROJECT_DETAILS: {
 			return { ...state, title: "", duration: 0, submissions: [] };
 		}
 

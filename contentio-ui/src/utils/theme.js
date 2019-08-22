@@ -1,10 +1,11 @@
 export default {
   colors: {
-    background: "#fafafa",
-    background2: "#eceff1",
+    background: "#121212",
+    background2: "#212121",
+    background3: "#424242",
     primary: "#4caf50",
-    text1: "rgba(0,0,0,0.87)",
-    text2: "rgba(0,0,0,0.60)",
+    text1: "#FFFFFF",
+    text2: "rgba(255,255,255,0.70)",
     line: "#c2c2c2"
   }
 };
