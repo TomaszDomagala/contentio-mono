@@ -5,6 +5,7 @@ import { apiUrl } from "../utils/urls";
 import { formatSec } from "../utils/formatting";
 
 class SubmissionView extends Component {
+    
 	render() {
 		return (
 			<Box>

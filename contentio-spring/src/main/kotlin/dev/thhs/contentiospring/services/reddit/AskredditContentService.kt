@@ -17,7 +17,6 @@ import dev.thhs.contentiospring.services.generators.MediaGenerator
 import dev.thhs.contentiospring.services.generators.VideoService
 import dev.thhs.contentiospring.utils.logger
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
 import net.dean.jraw.models.CommentSort
 import net.dean.jraw.models.PublicContribution
 import net.dean.jraw.references.CommentsRequest
@@ -33,14 +32,19 @@ sealed class DurationMsg {
     data class Add(val duration: Float) : DurationMsg()
 }
 
-sealed class RawSubmission {
-    data class Post(val postRef: SubmissionReference) : RawSubmission()
-    data class Comment(val commentRef: CommentNode<PublicContribution<*>>) : RawSubmission()
+sealed class RawSubmission(val order: Int) {
+    class Post(val postRef: SubmissionReference, order: Int) : RawSubmission(order)
+    class Comment(val commentRef: CommentNode<PublicContribution<*>>, order: Int) : RawSubmission(order)
 }
 
 sealed class ProcessedSubmission {
     data class Valid(val submission: Submission, val statement: Statement) : ProcessedSubmission()
     object Invalid : ProcessedSubmission()
+}
+
+sealed class PreparedSubmission {
+    class Success(val duration: Float) : PreparedSubmission()
+    object Failure : PreparedSubmission()
 }
 
 /**
@@ -86,7 +90,7 @@ class AskredditContentService(val redditApi: RedditApiService,
 
         if (startContentGeneration) launch {
             log.info("Generate content async process started")
-            generateContent(project)
+            generateContent(project, true)
             mediaGenerator.generateMedia(project)
 //            log.info("Creating video...")
 //            videoService.generateVideo(project)
@@ -96,83 +100,60 @@ class AskredditContentService(val redditApi: RedditApiService,
         return InitProjectResponse.Success(project.id)
     }
 
-    suspend fun generateContent(project: AskredditProject) = coroutineScope {
-
+    suspend fun generateContent(project: AskredditProject, generatePostSubmission: Boolean = false) = coroutineScope {
         val coreSubmissionRef = redditApi.getSubmissionByUrl(project.url)
         val commentsRoot = coreSubmissionRef.comments(CommentsRequest(sort = CommentSort.TOP, depth = 1))
 
-        val rawSubmissions = Channel<RawSubmission>(capacity = 1)
-        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.audioDuration }.sum()
-        val durationChannel = durationActor(projectDuration)
+        var projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.audioDuration }.sum()
+        var orderInProject = submissionRepository.findSubmissionsByProjectId(project.id).size
 
-        repeat(1) {
-            projectWorker(project, rawSubmissions, durationChannel)
+        if (generatePostSubmission) {
+            val rawPost = RawSubmission.Post(coreSubmissionRef, orderInProject)
+            val preparedPost = prepareSubmission(rawPost, project)
+            if (preparedPost is PreparedSubmission.Success) {
+                projectDuration += preparedPost.duration
+                orderInProject++
+            }
         }
-        rawSubmissions.send(RawSubmission.Post(coreSubmissionRef))
 
-        var durationReached = false
         for (comment in commentsRoot.walkTree()) {
             if (submissionRepository.findById(comment.subject.id).isPresent) continue
+            if (project.minDuration <= projectDuration) break
 
-            val durationRes = CompletableDeferred<Float>()
-            durationChannel.send(DurationMsg.Get(durationRes))
-            val duration = durationRes.await()
-            log.info("Current duration is $duration")
-            if (project.minDuration <= duration) {
-                rawSubmissions.close()
-                durationChannel.close()
-                durationReached = true
-                break
+            val rawComment = RawSubmission.Comment(comment, orderInProject)
+            val preparedComment = prepareSubmission(rawComment, project)
+            if (preparedComment is PreparedSubmission.Success) {
+                projectDuration += preparedComment.duration
+                orderInProject++
             }
-            val rawComment = RawSubmission.Comment(comment)
-            rawSubmissions.send(rawComment)
-            log.info("Comment send to channel")
+
         }
-        if (!durationReached) {
+        if (project.minDuration > projectDuration) {
             project.allCommentsUsed = true
             projectRepository.save(project)
         }
-        log.info("Canceling generator")
+        log.info("Generation End")
     }
 
+    suspend fun prepareSubmission(rawSubmission: RawSubmission, project: AskredditProject): PreparedSubmission {
+        val processed = when (rawSubmission) {
+            is RawSubmission.Post -> createSubmission(project, rawSubmission.postRef, rawSubmission.order)
+            is RawSubmission.Comment -> createSubmission(project, rawSubmission.commentRef, rawSubmission.order)
+        } as? ProcessedSubmission.Valid ?: return PreparedSubmission.Failure
+        statementRepository.save(processed.statement)
+        submissionRepository.save(processed.submission)
 
-    fun CoroutineScope.durationActor(initDuration: Float = 0f) = actor<DurationMsg> {
-        var duration = initDuration
-        for (msg in channel) {
-            when (msg) {
-                is DurationMsg.Add -> duration += msg.duration
-                is DurationMsg.Get -> msg.response.complete(duration)
-            }
-        }
-        log.info("Duration actor closed")
-    }
-
-    fun CoroutineScope.projectWorker(
-            project: AskredditProject,
-            rawSubmissions: ReceiveChannel<RawSubmission>,
-            durationChannel: SendChannel<DurationMsg>
-    ) = launch {
-        for (rawSubmission in rawSubmissions) {
-            val processed = when (rawSubmission) {
-                is RawSubmission.Post -> createSubmission(project, rawSubmission.postRef)
-                is RawSubmission.Comment -> createSubmission(project, rawSubmission.commentRef)
-            } as? ProcessedSubmission.Valid ?: continue
-
-            statementRepository.save(processed.statement)
-            submissionRepository.save(processed.submission)
-
-            val duration = prepareSentences(processed.statement)
-            if (!durationChannel.isClosedForSend) durationChannel.send(DurationMsg.Add(duration))
-        }
-        log.info("Worker closed")
+        val duration = prepareSentences(processed.statement)
+        return PreparedSubmission.Success(duration)
     }
 
     suspend fun createSubmission(
             project: AskredditProject,
-            postRef: SubmissionReference
+            postRef: SubmissionReference,
+            order: Int
     ): ProcessedSubmission {
         val details = postRef.inspect()
-        val post = Submission(details.id, details.author, details.score, details.created, project, SubmissionType.POST)
+        val post = Submission(details.id, details.author, details.score, details.created, project, order, SubmissionType.POST)
         val statement = Statement(post, details.title)
         post.statement = statement
         return ProcessedSubmission.Valid(post, statement)
@@ -180,13 +161,14 @@ class AskredditContentService(val redditApi: RedditApiService,
 
     suspend fun createSubmission(
             project: AskredditProject,
-            commentRef: CommentNode<PublicContribution<*>>
+            commentRef: CommentNode<PublicContribution<*>>,
+            order: Int
     ): ProcessedSubmission {
         val subject = commentRef.subject
         val commentText: String? = subject.body
         if (subject.isStickied || commentText == null) return ProcessedSubmission.Invalid
 
-        val comment = Submission(subject.id, subject.author, subject.score, subject.created, project, SubmissionType.COMMENT)
+        val comment = Submission(subject.id, subject.author, subject.score, subject.created, project, order, SubmissionType.COMMENT)
         val statement = Statement(comment, commentText)
         comment.statement = statement
         return ProcessedSubmission.Valid(comment, statement)
@@ -208,3 +190,78 @@ class AskredditContentService(val redditApi: RedditApiService,
         return wordCount.toFloat() / talkSpeed
     }
 }
+
+//    suspend fun generateContent(project: AskredditProject) = coroutineScope {
+//
+//        val coreSubmissionRef = redditApi.getSubmissionByUrl(project.url)
+//        val commentsRoot = coreSubmissionRef.comments(CommentsRequest(sort = CommentSort.TOP, depth = 1))
+//
+//        val rawSubmissions = Channel<RawSubmission>(capacity = 1)
+//        val projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.audioDuration }.sum()
+//        val durationChannel = durationActor(projectDuration)
+//
+//        repeat(1) {
+//            projectWorker(project, rawSubmissions, durationChannel)
+//        }
+//        var orderInProject = 0
+//        rawSubmissions.send(RawSubmission.Post(coreSubmissionRef, orderInProject))
+//
+//        var durationReached = false
+//        for (comment in commentsRoot.walkTree()) {
+//            log.info(orderInProject.toString())
+//            if (submissionRepository.findById(comment.subject.id).isPresent) continue
+//
+//            val durationRes = CompletableDeferred<Float>()
+//            durationChannel.send(DurationMsg.Get(durationRes))
+//            val duration = durationRes.await()
+//            log.info("Current duration is $duration")
+//            if (project.minDuration <= duration) {
+//                rawSubmissions.close()
+//                durationChannel.close()
+//                durationReached = true
+//                break
+//            }
+//            orderInProject += 1
+//            val rawComment = RawSubmission.Comment(comment, orderInProject)
+//            rawSubmissions.send(rawComment)
+//            log.info("Comment send to channel")
+//        }
+//        if (!durationReached) {
+//            project.allCommentsUsed = true
+//            projectRepository.save(project)
+//        }
+//        log.info("Canceling generator")
+//    }
+//
+//
+//    fun CoroutineScope.durationActor(initDuration: Float = 0f) = actor<DurationMsg> {
+//        var duration = initDuration
+//        for (msg in channel) {
+//            when (msg) {
+//                is DurationMsg.Add -> duration += msg.duration
+//                is DurationMsg.Get -> msg.response.complete(duration)
+//            }
+//        }
+//        log.info("Duration actor closed")
+//    }
+//
+//    fun CoroutineScope.projectWorker(
+//            project: AskredditProject,
+//            rawSubmissions: ReceiveChannel<RawSubmission>,
+//            durationChannel: SendChannel<DurationMsg>
+//    ) = launch {
+//        for (rawSubmission in rawSubmissions) {
+//            val processed = when (rawSubmission) {
+//                is RawSubmission.Post -> createSubmission(project, rawSubmission.postRef, rawSubmission.order)
+//                is RawSubmission.Comment -> createSubmission(project, rawSubmission.commentRef, rawSubmission.order)
+//            } as? ProcessedSubmission.Valid ?: continue
+//
+//            statementRepository.save(processed.statement)
+//            submissionRepository.save(processed.submission)
+//
+//            val duration = prepareSentences(processed.statement)
+//            if (!durationChannel.isClosedForSend) durationChannel.send(DurationMsg.Add(duration))
+//        }
+//        log.info("Worker closed")
+//    }
+

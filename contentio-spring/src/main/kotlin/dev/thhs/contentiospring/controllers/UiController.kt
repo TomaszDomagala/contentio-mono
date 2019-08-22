@@ -52,14 +52,12 @@ class UiController(
         val submissionItems = submissionRepo.findSubmissionsByProjectId(project.id).map { it ->
             val statement = it.statement ?: throw NoStatementFound()
             val edited = statement.originalText != statement.editedText
-            val lastSentenceId: Long = sentenceRepo.findSentencesByStatementSubmissionId(it.id)
-                    .reduce { acc, next -> if (acc.index > next.index) acc else next }.id
 
             val durations = sentenceRepo.findSentencesByStatementSubmissionId(it.id)
                     .map { sentence -> Pair(sentence.predictedDuration, sentence.audioDuration) }
                     .reduce { acc, next -> Pair(acc.first + next.first, acc.second + next.second) }
 
-            SubmissionListItem(it.id, it.author, it.score, statement.editedText, durations.first, durations.second, edited, lastSentenceId)
+            SubmissionListItem(it.id, it.author, it.score, statement.editedText, durations.first, durations.second, edited, it.orderInProject)
         }
         val predictedDuration = submissionItems.map { it.predictedDuration }.sum()
         val audioDuration = submissionItems.map { it.audioDuration }.sum()
@@ -104,6 +102,14 @@ class UiController(
         headers.contentLength = slide.size.toLong()
 
         return ResponseEntity(slide, headers, HttpStatus.OK)
+    }
+
+    @GetMapping("submissions/{id}/slide")
+    fun getSubmissionLastSlide(@PathVariable id: String): ResponseEntity<ByteArray> {
+        val lastSentenceId = sentenceRepo.findSentencesByStatementSubmissionId(id)
+                .reduce { acc, next -> if (acc.index > next.index) acc else next }
+                .id
+        return getSentenceSlide(lastSentenceId)
     }
 
 }

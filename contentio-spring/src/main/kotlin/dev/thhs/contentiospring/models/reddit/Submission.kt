@@ -25,6 +25,7 @@ data class Submission(
         @JoinColumn
         @JsonIgnore
         val project: AskredditProject,
+        val orderInProject: Int,
 
         @Column(name = "_type")
         val type: SubmissionType,

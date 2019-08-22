@@ -1,10 +1,15 @@
 import { SET_PROJECT_DETAILS, CLEAR_PROJECT_DETAILS } from "./types";
 
 const initialState = {
-	title: "",
-	predictedDuration: 0,
-	audioDuration: 0,
-	submissions: []
+	details: {
+		title: "",
+		predictedDuration: 0,
+		audioDuration: 0
+	},
+	submissions: [],
+	submissionDetails: {
+		
+	}
 };
 
 export function projectViewReducer(state = initialState, action) {
@@ -15,18 +20,20 @@ export function projectViewReducer(state = initialState, action) {
 				predictedDuration,
 				audioDuration,
 				submissions
-			} = action.details;
+			} = action.payload;
 			return {
 				...state,
-				title,
-				predictedDuration,
-				audioDuration,
+				details: {
+					title,
+					predictedDuration,
+					audioDuration
+				},
 				submissions
 			};
 		}
 
 		case CLEAR_PROJECT_DETAILS: {
-			return { ...state, title: "", duration: 0, submissions: [] };
+			return { ...initialState };
 		}
 
 		default: {

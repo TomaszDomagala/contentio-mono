@@ -13,7 +13,7 @@ export const fetchProjectDetails = projectId => {
 
 export const setProjectDetails = details => ({
 	type: SET_PROJECT_DETAILS,
-	details
+	payload:details
 });
 
 export const clearProjectDetails = () => ({

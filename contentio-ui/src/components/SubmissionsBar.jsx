@@ -34,7 +34,7 @@ export default connect(
 
 const BarItem = props => {
 	const { submission, onClick } = props;
-	const imgSrc = `${apiUrl}/ui/sentences/${submission.lastSentenceId}/slide`;
+	const imgSrc = `${apiUrl}/ui/submissions/${submission.id}/slide`;
 	console.log(submission);
 	return (
 		<Card
