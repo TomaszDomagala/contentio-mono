@@ -5,18 +5,22 @@ import { apiUrl } from "../utils/urls";
 import { formatSec } from "../utils/formatting";
 
 class SubmissionView extends Component {
-    
 	render() {
 		return (
-			<Box>
-				<Text color="text2">SubmissionView.jsx</Text>
-			</Box>
+			<Flex justifyContent="center">
+				<Box width={[1, 1 / 2]} bg="background2">
+					<Text color="text2">SubmissionView.jsx</Text>
+					<Text color="text1">
+						{JSON.stringify(this.props.submissionDetails)}
+					</Text>
+				</Box>
+			</Flex>
 		);
 	}
 }
 
 const mapStateToProps = ({ projectViewReducer }) => ({
-	submissions: projectViewReducer.submissions
+	submissionDetails: projectViewReducer.submissionDetails
 });
 const mapDispatchToProps = dispatch => ({});
 

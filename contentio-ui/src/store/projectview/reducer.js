@@ -1,4 +1,8 @@
-import { SET_PROJECT_DETAILS, CLEAR_PROJECT_DETAILS } from "./types";
+import {
+	SET_PROJECT_DETAILS,
+	CLEAR_PROJECT_DETAILS,
+	SET_SUBMISSION_VIEW
+} from "./types";
 
 const initialState = {
 	details: {
@@ -7,9 +11,7 @@ const initialState = {
 		audioDuration: 0
 	},
 	submissions: [],
-	submissionDetails: {
-		
-	}
+	submissionDetails: {}
 };
 
 export function projectViewReducer(state = initialState, action) {
@@ -30,6 +32,9 @@ export function projectViewReducer(state = initialState, action) {
 				},
 				submissions
 			};
+		}
+		case SET_SUBMISSION_VIEW: {
+			return { ...state, submissionDetails: action.payload };
 		}
 
 		case CLEAR_PROJECT_DETAILS: {

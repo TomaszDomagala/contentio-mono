@@ -8,7 +8,7 @@ class SubmissionsBar extends Component {
 	render() {
 		const { submissions } = this.props;
 		return (
-			<Box bg="background1" py={3}>
+			<Flex bg="background1" py={3}>
 				<Flex className="horizontal-scroll no-scroll-bar">
 					{submissions.map((submission, index) => (
 						<BarItem
@@ -17,7 +17,7 @@ class SubmissionsBar extends Component {
 						/>
 					))}
 				</Flex>
-			</Box>
+			</Flex>
 		);
 	}
 }
@@ -37,15 +37,15 @@ const BarItem = props => {
 	const imgSrc = `${apiUrl}/ui/submissions/${submission.id}/slide`;
 	console.log(submission);
 	return (
-		<Card
-			{...props}
-			mx={2}
-			style={{ minWidth: "256px" }}
-			onClick={() => onClick(submission.id)}
-		>
-			<Image src={imgSrc} />
-			<Text color="text2">{formatSec(submission.audioDuration)}</Text>
-			<Text color="text2">{submission.id}</Text>
-		</Card>
+			<Card
+				{...props}
+				mx={2}
+				style={{ minWidth: "256px", maxWidth: "256px" }}
+				onClick={() => onClick(submission.id)}
+			>
+				<Image src={imgSrc} />
+				<Text color="text2">{formatSec(submission.audioDuration)}</Text>
+				<Text color="text2">{submission.id}</Text>
+			</Card>
 	);
 };

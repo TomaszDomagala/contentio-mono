@@ -107,26 +107,24 @@ class AskredditContentService(val redditApi: RedditApiService,
         var projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.audioDuration }.sum()
         var orderInProject = submissionRepository.findSubmissionsByProjectId(project.id).size
 
-        if (generatePostSubmission) {
-            val rawPost = RawSubmission.Post(coreSubmissionRef, orderInProject)
-            val preparedPost = prepareSubmission(rawPost, project)
-            if (preparedPost is PreparedSubmission.Success) {
-                projectDuration += preparedPost.duration
-                orderInProject++
+        val handleSubmissionPreparation: suspend (RawSubmission) -> Unit = { rawSubmission: RawSubmission ->
+            when (val preparedSubmission = prepareSubmission(rawSubmission, project)) {
+                is PreparedSubmission.Failure -> log.info("Submission not created")
+                is PreparedSubmission.Success -> {
+                    projectDuration += preparedSubmission.duration
+                    orderInProject++
+                    log.info("Submission created")
+                }
             }
         }
+
+        if (generatePostSubmission) handleSubmissionPreparation(RawSubmission.Post(coreSubmissionRef, orderInProject))
 
         for (comment in commentsRoot.walkTree()) {
             if (submissionRepository.findById(comment.subject.id).isPresent) continue
             if (project.minDuration <= projectDuration) break
 
-            val rawComment = RawSubmission.Comment(comment, orderInProject)
-            val preparedComment = prepareSubmission(rawComment, project)
-            if (preparedComment is PreparedSubmission.Success) {
-                projectDuration += preparedComment.duration
-                orderInProject++
-            }
-
+            handleSubmissionPreparation(RawSubmission.Comment(comment, orderInProject))
         }
         if (project.minDuration > projectDuration) {
             project.allCommentsUsed = true
