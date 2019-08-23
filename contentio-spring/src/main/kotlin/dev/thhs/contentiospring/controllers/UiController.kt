@@ -81,7 +81,7 @@ class UiController(
         val details = sentences.map {
             val isAudioGenerated = File(it.audioPath).exists()
             val isSlideGenerated = File(it.slidePath).exists()
-            SentenceDetails(it.id, it.text, isAudioGenerated, isSlideGenerated)
+            SentenceDetails(it.id, it.index, it.text, isAudioGenerated, isSlideGenerated)
         }
         return ResponseEntity.ok(details)
 

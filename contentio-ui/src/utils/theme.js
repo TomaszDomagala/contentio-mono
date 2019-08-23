@@ -6,6 +6,7 @@ export default {
     primary: "#4caf50",
     text1: "#FFFFFF",
     text2: "rgba(255,255,255,0.70)",
-    line: "#c2c2c2"
+    text3: "rgba(255,255,255,0.50)",
+    divider:"rgba(255,255,255,0.12)"
   }
 };

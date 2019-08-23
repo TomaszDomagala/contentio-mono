@@ -2,8 +2,8 @@ import axios from "axios";
 import {
 	SET_PROJECT_DETAILS,
 	CLEAR_PROJECT_DETAILS,
-	SET_SUBMISSION_VIEW
 } from "./types";
+import { fetchSubmissionDetails } from "../submissionview/actions";
 import { apiUrl } from "../../utils/urls";
 
 export const fetchProjectDetails = projectId => {
@@ -16,10 +16,7 @@ export const fetchProjectDetails = projectId => {
 		const { id: submissionId } = project.submissions.find(
 			subm => subm.orderInProject === 0
 		);
-		const { data: submission } = await axios.get(
-			`${apiUrl}/ui/submissions/${submissionId}`
-		);
-		dispatch(setSubmissionView(submission));
+		dispatch(fetchSubmissionDetails(submissionId));
 	};
 };
 
@@ -30,9 +27,4 @@ export const setProjectDetails = details => ({
 
 export const clearProjectDetails = () => ({
 	type: CLEAR_PROJECT_DETAILS
-});
-
-export const setSubmissionView = submission => ({
-	type: SET_SUBMISSION_VIEW,
-	payload: submission
 });

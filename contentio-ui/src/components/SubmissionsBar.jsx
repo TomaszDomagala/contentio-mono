@@ -1,23 +1,26 @@
 import React, { Component } from "react";
 import { Box, Flex, Card, Text, Heading, Image } from "rebass";
 import { connect } from "react-redux";
+import { fetchSubmissionDetails } from "../store/submissionview/actions";
 import { apiUrl } from "../utils/urls";
 import { formatSec } from "../utils/formatting";
+import Thumbnail from "../containers/Thumbnail";
 
 class SubmissionsBar extends Component {
 	render() {
 		const { submissions } = this.props;
 		return (
-			<Flex bg="background1" py={3}>
+			<Box bg="background1" py={3}>
 				<Flex className="horizontal-scroll no-scroll-bar">
-					{submissions.map((submission, index) => (
+					{submissions.map(submission => (
 						<BarItem
+							key={submission.id}
 							submission={submission}
-							onClick={console.log}
+							onClick={this.props.changeSubmission}
 						/>
 					))}
 				</Flex>
-			</Flex>
+			</Box>
 		);
 	}
 }
@@ -25,7 +28,10 @@ class SubmissionsBar extends Component {
 const mapStateToProps = ({ projectViewReducer }) => ({
 	submissions: projectViewReducer.submissions
 });
-const mapDispatchToProps = dispatch => ({});
+const mapDispatchToProps = dispatch => ({
+	changeSubmission: submissionId =>
+		dispatch(fetchSubmissionDetails(submissionId))
+});
 
 export default connect(
 	mapStateToProps,
@@ -35,17 +41,29 @@ export default connect(
 const BarItem = props => {
 	const { submission, onClick } = props;
 	const imgSrc = `${apiUrl}/ui/submissions/${submission.id}/slide`;
-	console.log(submission);
+	const width = 256;
+	const height = 256 / (16 / 9);
 	return (
-			<Card
-				{...props}
-				mx={2}
-				style={{ minWidth: "256px", maxWidth: "256px" }}
-				onClick={() => onClick(submission.id)}
-			>
-				<Image src={imgSrc} />
-				<Text color="text2">{formatSec(submission.audioDuration)}</Text>
-				<Text color="text2">{submission.id}</Text>
-			</Card>
+		<Box
+			{...props}
+			mx={2}
+			style={{
+				cursor: "pointer",
+				minWidth: width,
+				maxWidth: width,
+				height,
+				backgroundImage: `url(${imgSrc})`,
+				backgroundSize: "cover"
+			}}
+			onClick={() => onClick(submission.id)}
+		>
+			<Flex flexDirection="column-reverse" style={{ height: "100%" }}>
+				<Flex flexDirection="row-reverse">
+					<Text m={1} color="text2">
+						{formatSec(submission.audioDuration)}
+					</Text>
+				</Flex>
+			</Flex>
+		</Box>
 	);
 };

@@ -11,6 +11,7 @@ data class SubmissionDetails(
 
 data class SentenceDetails(
         val id: Long,
+        val index: Int,
         val text: String,
         val isAudioGenerated: Boolean,
         val isSlideGenerated: Boolean

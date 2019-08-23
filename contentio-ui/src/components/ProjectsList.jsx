@@ -15,7 +15,7 @@ class ProjectListItem extends Component {
 				<Card
 					my={2}
 					p={3}
-					borderColor="line"
+					borderColor="divider"
 					borderStyle="solid"
 					border={1}
 					borderRadius={8}

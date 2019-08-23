@@ -15,7 +15,7 @@ const CreateProject = props => {
   return (
     <Card
       p={3}
-      borderColor="line"
+      borderColor="divider"
       borderStyle="solid"
       border={1}
       borderRadius={8}
@@ -45,7 +45,7 @@ const CreateProject = props => {
       <Box p={2}>
         <Button
           bg="primary"
-          color="background"
+          color="text1"
           onClick={() => {
             props.createProject(url, minDuration);
             reset();

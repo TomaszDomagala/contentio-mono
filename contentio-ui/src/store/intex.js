@@ -6,13 +6,15 @@ import { createBrowserHistory } from "history";
 
 import { projectsReducer } from "./projects/reducer";
 import { projectViewReducer } from "./projectview/reducer";
+import { submissionViewReducer } from "./submissionview/reducer";
 
 export const history = createBrowserHistory();
 
 const rootReducer = combineReducers({
 	router: connectRouter(history),
 	projectsReducer,
-	projectViewReducer
+	projectViewReducer,
+	submissionViewReducer
 });
 
 function configureStore() {
