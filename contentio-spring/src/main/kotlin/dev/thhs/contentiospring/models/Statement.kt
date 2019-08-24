@@ -13,7 +13,11 @@ data class Statement(
 
         @Lob
         @Column(length = 100000)
-        val text: String,
+        val originalText: String,
+
+        @Lob
+        @Column(length = 100000)
+        val editedText: String=originalText,
 
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,6 +25,6 @@ data class Statement(
         val id: Long = 0
 ) {
     override fun toString(): String {
-        return "Statement(text='$text', id=$id)"
+        return "Statement(originalText='$originalText', editedText='$editedText', id=$id)"
     }
 }

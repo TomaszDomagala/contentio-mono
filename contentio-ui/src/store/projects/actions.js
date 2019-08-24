@@ -1,5 +1,6 @@
 import axios from "axios";
 import { SET_PROJECT_PAGE } from "./types";
+import { apiUrl } from "../../utils/urls";
 
 // export const createProject = (url: string, minDuration: number): CreateProjectAction => ({
 //     type: CREATE_PROJECT, url, minDuration
@@ -7,7 +8,7 @@ import { SET_PROJECT_PAGE } from "./types";
 
 export const createProject = (url, duration) => {
   return dispatch => {
-    axios.post("http://192.168.1.11:8080/projects/init", { url, duration });
+    axios.post(`${apiUrl}/projects/init`, { url, duration });
   };
 };
 
@@ -15,7 +16,7 @@ export const getProjectsPage = (page, size = 5) => {
   return async dispatch => {
     try {
       const response = await axios.get(
-        "http://192.168.1.11:8080/projects/page",
+        "http://192.168.1.11:8080/ui/projects",
         { params: { page, size } }
       );
 

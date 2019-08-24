@@ -16,38 +16,6 @@ import javax.imageio.ImageIO
 object SlidesApiService {
     private val log by logger()
 
-//    private val slidesLocation = System.getenv("ContentioSlides")
-//            ?: throw AssertionError("No ContentioSlides location environment variable set")
-//    private val slidesDir = File(slidesLocation)
-//    private val slidesProcess: Process = startSlidesProcess()
-
-//    private fun buildSlidesApplication() {
-//        val buildCommand = "npm.cmd run build"
-//
-//        log.info("Building slides application...")
-//        val buildProcess = buildCommand.runCommand(slidesDir)
-//        if (buildProcess.waitFor() != 0) throw AssertionError("Contentio slides build error")
-//        log.info("Build completed!")
-//    }
-
-//    private fun startSlidesProcess(): Process {
-//        val startCommand = "npm.cmd run dev"
-////        buildSlidesApplication()
-//
-//        log.info("Starting slides process")
-//        return startCommand.createCommandProcess(slidesDir)
-//                .redirectInput(ProcessBuilder.Redirect.INHERIT)
-//                .redirectError(ProcessBuilder.Redirect.INHERIT)
-//                .start()
-//    }
-
-//    @PreDestroy
-//    private fun destroySlidesProcess() {
-//        log.info("Destroying nlp process")
-//        if (slidesProcess.isAlive) slidesProcess.destroy()
-//    }
-
-
     fun createSlide(submissionId: String, slideNumber: Int, workingDir: File): File {
         val httpClient = HttpClientBuilder.create().build()
         val getMethod = HttpGet("http://127.0.0.1:3030/api/screenshot/$submissionId/$slideNumber")

@@ -13,4 +13,6 @@ interface StatementRepository : JpaRepository<Statement, Long> {
 
     @Query("select s from Statement s where s.submission.type = dev.thhs.contentiospring.models.reddit.SubmissionType.POST and s.submission.project.id = :id")
     fun findPostStatementByProjectId(@Param("id") id: Long): Statement
+
+    fun findStatementsBySubmissionProjectId(id: Long): List<Statement>
 }

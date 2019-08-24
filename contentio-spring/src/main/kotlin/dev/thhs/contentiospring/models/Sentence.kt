@@ -10,6 +10,7 @@ data class Sentence(
         @JsonIgnore
         val statement: Statement,
 
+        @Column(name = "_index")
         val index: Int,
 
         @Lob
@@ -17,7 +18,8 @@ data class Sentence(
         val text: String = "",
         val paragraph: Int,
 
-        var duration: Float = 0f,
+        var predictedDuration: Float = 0f,
+        var audioDuration: Float = 0f,
 
         @JsonIgnore
         var audioPath: String = "",

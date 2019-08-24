@@ -15,17 +15,17 @@ const CreateProject = props => {
   return (
     <Card
       p={3}
-      borderColor="line"
+      borderColor="divider"
       borderStyle="solid"
       border={1}
       borderRadius={8}
     >
       <Box p={2}>
-        <Text fontSize={3}>Create project</Text>
+        <Text fontSize={3} color="text1">Create project</Text>
       </Box>
 
       <Box p={2}>
-        <Text fontSize={1}>Submission Url</Text>
+        <Text fontSize={1} color="text2">Submission Url</Text>
         <input
           value={url}
           onChange={e => {
@@ -34,7 +34,7 @@ const CreateProject = props => {
         />
       </Box>
       <Box p={2}>
-        <Text fontSize={1}>Minimal duration [sec]</Text>
+        <Text fontSize={1} color="text2">Minimal duration [sec]</Text>
         <input
           value={minDuration}
           onChange={e => {
@@ -45,7 +45,7 @@ const CreateProject = props => {
       <Box p={2}>
         <Button
           bg="primary"
-          color="background"
+          color="text1"
           onClick={() => {
             props.createProject(url, minDuration);
             reset();

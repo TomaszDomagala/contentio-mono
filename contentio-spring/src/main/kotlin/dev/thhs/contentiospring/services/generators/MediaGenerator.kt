@@ -20,7 +20,6 @@ import kotlin.coroutines.CoroutineContext
 data class MediaRequest(val sentence: Sentence, val type: MediaType, val overwriteExisting: Boolean = false)
 
 
-
 enum class MediaType {
     Audio, Slides
 }
@@ -92,7 +91,7 @@ class MediaGenerator(
             workingDir: File = createSubmissionDir(sentence.statement.submission, MediaType.Audio)
     ) {
         val submissionId = sentence.statement.submission.id
-        val cleanedText = ttsService.cleanMarkdownText(sentence.text)
+        val cleanedText = ttsService.clearTextForReading(sentence.text)
         val audioFile = ttsService.textToAudioFile(cleanedText, "${sentence.index}_$submissionId", workingDir)
         val duration = try {
             ttsService.getAudioFileDuration(audioFile)
@@ -103,7 +102,7 @@ class MediaGenerator(
             0f
         }
         sentence.audioPath = audioFile.absolutePath
-        sentence.duration = duration
+        sentence.audioDuration = duration
         sentenceRepository.save(sentence)
     }
 

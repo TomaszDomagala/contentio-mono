@@ -10,27 +10,21 @@ import dev.thhs.contentiospring.repositories.AskredditProjectRepository
 import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
 import dev.thhs.contentiospring.repositories.SubmissionRepository
-import dev.thhs.contentiospring.services.reddit.AskredditService
 import org.springframework.web.bind.annotation.*
 
 
 @RestController
 @RequestMapping("test")
-class TestController(val projectRepo: AskredditProjectRepository,
-                     val submissionRepo: SubmissionRepository,
-                     val statementRepo: StatementRepository,
-                     val sentenceRepo: SentenceRepository,
-                     val askredditService: AskredditService) {
+class TestController(
+        val projectRepo: AskredditProjectRepository,
+        val submissionRepo: SubmissionRepository,
+        val statementRepo: StatementRepository,
+        val sentenceRepo: SentenceRepository
+) {
 
     @GetMapping("/string")
     fun getTestString(): String {
         return "Test String :)"
-    }
-
-    @PostMapping("/createproject")
-    fun createProject(@RequestBody request:InitProjectRequest):String {
-        askredditService.createProject(request)
-        return "success"
     }
 
     @GetMapping("/projects")
@@ -54,7 +48,7 @@ class TestController(val projectRepo: AskredditProjectRepository,
     }
 
     @GetMapping("/sentences/{id}")
-    fun getSentencesByProjectId(@PathVariable id: String):List<Sentence>{
+    fun getSentencesByProjectId(@PathVariable id: String): List<Sentence> {
         return sentenceRepo.findSentencesByStatementSubmissionProjectId(id.toLong())
     }
 

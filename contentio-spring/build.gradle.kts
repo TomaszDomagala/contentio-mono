@@ -56,6 +56,9 @@ dependencies {
     implementation(group = "org.springframework.boot", name = "spring-boot-starter-actuator", version = "2.1.6.RELEASE")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
+    implementation( group= "mysql", name= "mysql-connector-java", version= "8.0.17")
+
+//    implementation("com.oracle:ojdbc7:12.1.0.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
 

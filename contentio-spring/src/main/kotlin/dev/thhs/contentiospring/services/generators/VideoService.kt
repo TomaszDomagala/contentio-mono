@@ -58,7 +58,7 @@ class VideoService(
     override val coroutineContext: CoroutineContext
         get() = job + Dispatchers.Default
 
-    suspend fun generateVideo(project: AskredditProject) = coroutineScope {
+    suspend fun generateProjectVideo(project: AskredditProject) = coroutineScope {
         val orderedSubmissions = submissionsOrderInVideo(project)
         val submissionVideos = createSubmissionsVideos(orderedSubmissions)
         val filtered: List<Clip.Video> = submissionVideos.values.toList().filterNotNull()
@@ -201,7 +201,7 @@ class VideoService(
             submission: Submission,
             sentences: List<Sentence> = sentenceRepository.findSentencesByStatementSubmissionId(submission.id)
     ): Clip.Video {
-        val slides: List<ImgDur> = sentences.map { ImgDur(File(it.slidePath), it.duration) }
+        val slides: List<ImgDur> = sentences.map { ImgDur(File(it.slidePath), it.predictedDuration) }
         val montageDir = submission.createCategorySubmissionDir("Video")
 
         return createVideoFromImages(slides, montageDir, "${submission.id}_slides")

@@ -21,7 +21,7 @@ def tts():
     for index, paragraph in enumerate(paragraphs):
         sentences = sent_tokenize(paragraph)
         paragraphed_sentences += list(
-            map(lambda s: {"text": s, "paragraph": index}, sentences))
+            map(lambda s: {"text": s, "paragraph": index, "wordCount": len(word_tokenize(s))}, sentences))
 
     return jsonify({"sentences": paragraphed_sentences, "wordCount": word_count})
 

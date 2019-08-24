@@ -14,7 +14,7 @@ enum class SubmissionType {
 
 @Entity
 data class Submission(
-        @Id @Column(name = "id")
+        @Id @Column(name = "id", length = 10)
         val id: String = "",
 
         val author: String,
@@ -25,7 +25,9 @@ data class Submission(
         @JoinColumn
         @JsonIgnore
         val project: AskredditProject,
+        val orderInProject: Int,
 
+        @Column(name = "_type")
         val type: SubmissionType,
 
         @OneToOne(cascade = [CascadeType.ALL])
