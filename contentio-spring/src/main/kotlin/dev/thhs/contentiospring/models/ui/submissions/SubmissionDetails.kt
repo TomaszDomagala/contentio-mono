@@ -1,6 +1,5 @@
 package dev.thhs.contentiospring.models.ui.submissions
 
-
 data class SubmissionDetails(
         val id: String,
         val author: String,

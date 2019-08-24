@@ -17,8 +17,10 @@ data class Statement(
 
         @Lob
         @Column(length = 100000)
-        val editedText: String=originalText,
+        val editedText: String = originalText,
 
+        @JsonIgnore
+        val videoPath: String = "",
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
         @Column(name = "id")
