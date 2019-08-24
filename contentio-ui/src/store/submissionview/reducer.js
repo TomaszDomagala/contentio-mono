@@ -7,7 +7,11 @@ import {
 const initialState = {
 	details: {},
 	sentences: [],
-	currentSentenceIndex: null
+	sentenceView: {
+		currentIndex: null,
+		first: true,
+		last: true
+	}
 };
 
 export function submissionViewReducer(state = initialState, action) {
@@ -19,7 +23,12 @@ export function submissionViewReducer(state = initialState, action) {
 			return { ...state, sentences: action.payload };
 		}
 		case SET_CURRENT_SENTENCE: {
-			return { ...state, currentSentenceIndex: action.payload };
+			const sentenceView = {
+				currentIndex: action.payload,
+				first: action.payload === 0,
+				last: action.payload === state.sentences.length - 1
+			};
+			return { ...state, sentenceView };
 		}
 		default: {
 			return state;
