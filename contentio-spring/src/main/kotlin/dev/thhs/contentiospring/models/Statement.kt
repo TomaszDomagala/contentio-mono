@@ -19,8 +19,6 @@ data class Statement(
         @Column(length = 100000)
         val editedText: String = originalText,
 
-        @JsonIgnore
-        val videoPath: String = "",
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
         @Column(name = "id")

@@ -15,7 +15,7 @@ data class AskredditProject(
         val minDuration: Int,
         var allCommentsUsed: Boolean = false,
         @JsonIgnore
-        val videoPath: String = "",
+        var videoPath: String = "",
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = 0
 )

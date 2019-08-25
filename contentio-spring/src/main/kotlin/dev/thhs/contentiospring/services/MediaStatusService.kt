@@ -17,22 +17,16 @@ class MediaStatusService(
 
 
     fun mediaStatus(project: AskredditProject): ProjectMediaStatus {
-        val submissions = submissionRepository.findSubmissionsByProjectId(project.id)
-        val submissionsMediaStatus = statusFromFiles(submissions.map {
-            it.statement ?: throw NoStatementFound()
-        }.map { File(it.videoPath) })
         val sentences = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id)
         val sentencesMediaStatus = sentences.map { mediaStatus(it).mediaStatus }.reduce { curr, next -> curr + next }
         val videoStatus = statusFromFiles(File(project.videoPath))
-        return ProjectMediaStatus(project.id, submissionsMediaStatus, sentencesMediaStatus, videoStatus)
+        return ProjectMediaStatus(project.id, sentencesMediaStatus, videoStatus)
     }
 
     fun mediaStatus(submission: Submission): SubmissionMediaStatus {
         val sentences = sentenceRepository.findSentencesByStatementSubmissionId(submission.id)
         val sentencesMediaStatus = sentences.map { mediaStatus(it).mediaStatus }.reduce { curr, next -> curr + next }
-        val statement = submission.statement ?: throw NoStatementFound()
-        val videoStatus = statusFromFiles(File(statement.videoPath))
-        return SubmissionMediaStatus(submission.id, sentencesMediaStatus, videoStatus)
+        return SubmissionMediaStatus(submission.id, sentencesMediaStatus)
     }
 
     fun mediaStatus(sentence: Sentence): SentenceMediaStatus {

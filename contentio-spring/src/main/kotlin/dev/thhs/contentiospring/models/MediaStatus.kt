@@ -29,12 +29,11 @@ data class MediaStatus(
 
 data class ProjectMediaStatus(
         val id: Long,
-        val submissionsVideosStatus: GeneratedFilesStatus,
         val sentencesMediaStatus: MediaStatus,
         val videoStatus: GeneratedFilesStatus
 )
 
-data class SubmissionMediaStatus(val id: String, val sentencesMediaStatus: MediaStatus, val videoStatus: GeneratedFilesStatus)
+data class SubmissionMediaStatus(val id: String, val sentencesMediaStatus: MediaStatus)
 
 data class SentenceMediaStatus(val id: Long, val mediaStatus: MediaStatus)
 
