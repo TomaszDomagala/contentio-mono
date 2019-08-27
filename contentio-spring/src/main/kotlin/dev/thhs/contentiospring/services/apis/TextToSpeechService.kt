@@ -37,12 +37,15 @@ object TextToSpeechService {
         return Jsoup.parse(html).text()
     }
 
-    private fun clearQuotationMarks(text: String): String = text.replace("\"", "")
 
     fun clearTextForReading(text: String): String {
-        val cleared = clearMarkdownText(text)
-        return clearQuotationMarks(cleared)
+        return clearMarkdownText(text)
+                .clearFrom("\"")
+                .clearFrom("\'")
+
     }
+
+    private fun String.clearFrom(string: String) = replace(string, "")
 
     fun getAudioFileDuration(audioFile: File): Float {
         var stream = AudioSystem.getAudioInputStream(audioFile)

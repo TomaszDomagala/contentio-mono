@@ -7,6 +7,7 @@ import dev.thhs.contentiospring.models.reddit.Submission
 import dev.thhs.contentiospring.models.reddit.SubmissionType
 import dev.thhs.contentiospring.models.webrequests.InitProjectRequest
 import dev.thhs.contentiospring.models.webrequests.InitProjectResponse
+import dev.thhs.contentiospring.models.webrequests.InitProjectVideoRequest
 import dev.thhs.contentiospring.repositories.AskredditProjectRepository
 import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
@@ -15,6 +16,7 @@ import dev.thhs.contentiospring.services.apis.NlpApiService
 import dev.thhs.contentiospring.services.apis.RedditApiService
 import dev.thhs.contentiospring.services.generators.MediaGenerator
 import dev.thhs.contentiospring.services.generators.VideoService
+import dev.thhs.contentiospring.services.generators.VideoService2
 import dev.thhs.contentiospring.utils.logger
 import kotlinx.coroutines.*
 import net.dean.jraw.models.CommentSort
@@ -61,7 +63,8 @@ class AskredditContentService(val redditApi: RedditApiService,
                               val sentenceRepository: SentenceRepository,
                               val nlpApi: NlpApiService,
                               val mediaGenerator: MediaGenerator,
-                              val videoService: VideoService
+                              val videoService: VideoService,
+                              val videoService2: VideoService2
 ) : CoroutineScope {
     private val job = Job()
     private val log by logger()
@@ -92,7 +95,8 @@ class AskredditContentService(val redditApi: RedditApiService,
             log.info("Generate content async process started")
             generateContent(project, true)
             mediaGenerator.generateMedia(project)
-//            log.info("Creating video...")
+            log.info("Creating video...")
+            videoService2.initProjectVideo(InitProjectVideoRequest(project.id))
 //            videoService.generateVideo(project)
             log.info("Generating content end")
         }

@@ -23,9 +23,10 @@ data class Sentence(
 
         @JsonIgnore
         var audioPath: String = "",
-
         @JsonIgnore
         var slidePath: String = "",
+        @JsonIgnore
+        var videoPath: String = "",
 
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = 0

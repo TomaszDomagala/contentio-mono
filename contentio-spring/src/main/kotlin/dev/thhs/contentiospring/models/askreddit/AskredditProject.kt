@@ -1,5 +1,6 @@
 package dev.thhs.contentiospring.models.askreddit
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
@@ -13,6 +14,8 @@ data class AskredditProject(
         val projectPath: String,
         val minDuration: Int,
         var allCommentsUsed: Boolean = false,
+        @JsonIgnore
+        var videoPath: String = "",
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         val id: Long = 0
 )
