@@ -1,5 +1,5 @@
 import React, { Component, PureComponent } from "react";
-import { Box, Flex, Card, Text, Heading, Image } from "rebass";
+import { Box, Flex, Card, Text, Heading, Image, Button } from "rebass";
 import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
@@ -26,21 +26,19 @@ class SubmissionView extends PureComponent {
 		// console.log(currentSentenceIndex);
 
 		return (
-			<Flex justifyContent="center">
-				<Box width={[1, 1 / 2]} bg="background2">
-					<Text color="text2">SubmissionView.jsx</Text>
-					<ReactResizeDetector handleWidth>
-						<SentenceSlide
-							sentence={sentences[sentenceView.currentIndex]}
-							first={sentenceView.first}
-							last={sentenceView.last}
-							setCurrentSentence={setCurrentSentence}
-						/>
-					</ReactResizeDetector>
+			<Box mx="auto" width={[1, 1 / 2]} bg="background2">
+				<Text color="text2">SubmissionView.jsx</Text>
+				<ReactResizeDetector handleWidth>
+					<SentenceSlide
+						sentence={sentences[sentenceView.currentIndex]}
+						first={sentenceView.first}
+						last={sentenceView.last}
+						setCurrentSentence={setCurrentSentence}
+					/>
+				</ReactResizeDetector>
 
-					<Text color="text2">Hello</Text>
-				</Box>
-			</Flex>
+				<Text color="text2">Hello</Text>
+			</Box>
 		);
 	}
 }
@@ -130,19 +128,21 @@ const SlideButton = ({ direction, disabled, onClick }) => {
 	}
 	const visibility = disabled ? "hidden" : "visible";
 	return (
-		<Flex
-			flexDirection="column"
-			justifyContent="center"
-			width={[1 / 7, 1 / 16]}
-			bg="rgba(255,255,255,0.1)"
-			style={{ height: "100%", cursor: "pointer", visibility }}
-			onClick={onClick}
-		>
-			<Text alignSelf="center">
-				<IconContext.Provider value={{ color: "white", size: "2rem" }}>
-					{icon}
-				</IconContext.Provider>
-			</Text>
-		</Flex>
+			<Flex
+				flexDirection="column"
+				justifyContent="center"
+				width={[1 / 7, 1 / 16]}
+				bg="rgba(255,255,255,0.1)"
+				style={{ height: "100%", cursor: "pointer", visibility }}
+				onClick={onClick}
+			>
+				<Text alignSelf="center">
+					<IconContext.Provider
+						value={{ color: "white", size: "2rem" }}
+					>
+						{icon}
+					</IconContext.Provider>
+				</Text>
+			</Flex>
 	);
 };

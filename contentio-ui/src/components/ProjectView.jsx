@@ -4,7 +4,7 @@ import { Box, Flex, Card, Text, Heading } from "rebass";
 import SubmissionsBar from "./SubmissionsBar";
 import SubmissionView from "./SubmissionView";
 import { fetchProjectDetails } from "../store/projectview/actions";
-
+import ProjectDetails from "./ProjectDetails";
 
 class ProjectView extends Component {
 	componentDidMount() {
@@ -14,7 +14,8 @@ class ProjectView extends Component {
 
 	render() {
 		return (
-			<Box bg="background" style={{ minHeight: "100vh" }}>
+			<Box bg="background" pt={2} style={{ minHeight: "100vh" }} >
+				<ProjectDetails />
 				<SubmissionsBar />
 				<SubmissionView />
 			</Box>
