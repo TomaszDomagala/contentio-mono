@@ -1,5 +1,6 @@
 import React, { Component, PureComponent } from "react";
 import { Box, Flex, Card, Text, Heading, Image, Button } from "rebass";
+import { Label, Textarea } from "@rebass/forms";
 import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
@@ -26,25 +27,38 @@ class SubmissionView extends PureComponent {
 		// console.log(currentSentenceIndex);
 
 		return (
-			<Box mx="auto" width={[1, 1 / 2]} bg="background2">
-				<Text color="text2">SubmissionView.jsx</Text>
-				<ReactResizeDetector handleWidth>
-					<SentenceSlide
-						sentence={sentences[sentenceView.currentIndex]}
-						first={sentenceView.first}
-						last={sentenceView.last}
-						setCurrentSentence={setCurrentSentence}
+			<Flex justifyContent="center">
+				<Card
+					p={2}
+					m={[1, 0]}
+					width={[1, 1 / 2]}
+					bg="background2"
+					borderColor="divider"
+					borderStyle="solid"
+					border={1}
+					borderRadius={8}
+				>
+					<Text color="text2">{JSON.stringify(details.id)}</Text>
+					<ReactResizeDetector handleWidth>
+						<SentenceSlide
+							sentence={sentences[sentenceView.currentIndex]}
+							first={sentenceView.first}
+							last={sentenceView.last}
+							setCurrentSentence={setCurrentSentence}
+						/>
+					</ReactResizeDetector>
+					<TextEdit
+						initialText={details.editedText}
+						key={details.id}
 					/>
-				</ReactResizeDetector>
-
-				<Text color="text2">Hello</Text>
-			</Box>
+				</Card>
+			</Flex>
 		);
 	}
 }
 
 const mapStateToProps = ({ submissionViewReducer }) => ({
-	details: submissionViewReducer.details,
+	details: submissionViewReducer.submissionDetails,
 	sentences: submissionViewReducer.sentences,
 	sentenceView: submissionViewReducer.sentenceView
 });
@@ -56,6 +70,53 @@ export default connect(
 	mapStateToProps,
 	mapDispatchToProps
 )(SubmissionView);
+
+class TextEdit extends PureComponent {
+	state = {
+		hidden: true,
+		text: this.props.initialText
+	};
+
+	constructor(props) {
+		super(props);
+		this.toggleShow = this.toggleShow.bind(this);
+		this.handleTextChange = this.handleTextChange.bind(this);
+	}
+
+	toggleShow() {
+		this.setState({ hidden: !this.state.hidden });
+	}
+	handleTextChange(event) {
+		this.setState({ text: event.target.value });
+	}
+	render() {
+		const { hidden, text } = this.state;
+		const toggleText = hidden ? "Edit text" : "Hide";
+
+		return (
+			<Box mt={3}>
+				<Button onClick={this.toggleShow}>{toggleText}</Button>
+				<Box style={hidden ? { display: "none" } : {}}>
+					<Box my={2}>
+						<Label htmlFor="edittext">
+							<Text color="text2">Statement text</Text>
+						</Label>
+						<Textarea
+							color="white"
+							value={text}
+							onChange={this.handleTextChange}
+							id="edittext"
+							name="edittext"
+							style={{ minHeight: "300px", resize: "vertical" }}
+						/>
+					</Box>
+
+					<Button>Save changes</Button>
+				</Box>
+			</Box>
+		);
+	}
+}
 
 class SentenceSlide extends PureComponent {
 	constructor(props) {
@@ -128,21 +189,19 @@ const SlideButton = ({ direction, disabled, onClick }) => {
 	}
 	const visibility = disabled ? "hidden" : "visible";
 	return (
-			<Flex
-				flexDirection="column"
-				justifyContent="center"
-				width={[1 / 7, 1 / 16]}
-				bg="rgba(255,255,255,0.1)"
-				style={{ height: "100%", cursor: "pointer", visibility }}
-				onClick={onClick}
-			>
-				<Text alignSelf="center">
-					<IconContext.Provider
-						value={{ color: "white", size: "2rem" }}
-					>
-						{icon}
-					</IconContext.Provider>
-				</Text>
-			</Flex>
+		<Button
+			flexDirection="column"
+			justifyContent="center"
+			width={[1 / 7, 1 / 16]}
+			bg="rgba(255,255,255,0.1)"
+			style={{ height: "100%", cursor: "pointer", visibility }}
+			onClick={onClick}
+		>
+			<Text alignSelf="center">
+				<IconContext.Provider value={{ color: "white", size: "2rem" }}>
+					{icon}
+				</IconContext.Provider>
+			</Text>
+		</Button>
 	);
 };

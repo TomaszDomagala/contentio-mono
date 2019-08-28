@@ -14,7 +14,7 @@ class ProjectView extends Component {
 
 	render() {
 		return (
-			<Box bg="background" pt={2} style={{ minHeight: "100vh" }} >
+			<Box bg="background" pt={2} pb={5} style={{ minHeight: "100vh" }} >
 				<ProjectDetails />
 				<SubmissionsBar />
 				<SubmissionView />
