@@ -5,6 +5,7 @@ import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
 import { apiUrl } from "../utils/urls";
+import axios from "axios";
 import { formatSec } from "../utils/formatting";
 import { IconContext } from "react-icons";
 import {
@@ -48,6 +49,7 @@ class SubmissionView extends PureComponent {
 						/>
 					</ReactResizeDetector>
 					<TextEdit
+						submissionId={details.id}
 						initialText={details.editedText}
 						key={details.id}
 					/>
@@ -81,6 +83,7 @@ class TextEdit extends PureComponent {
 		super(props);
 		this.toggleShow = this.toggleShow.bind(this);
 		this.handleTextChange = this.handleTextChange.bind(this);
+		this.saveChanges = this.saveChanges.bind(this);
 	}
 
 	toggleShow() {
@@ -88,6 +91,13 @@ class TextEdit extends PureComponent {
 	}
 	handleTextChange(event) {
 		this.setState({ text: event.target.value });
+	}
+	async saveChanges() {
+		const res = await axios.put(
+			`${apiUrl}/submissions/${this.props.submissionId}/text`,
+			{ newText: this.state.text }
+		);
+		console.log(res);
 	}
 	render() {
 		const { hidden, text } = this.state;
@@ -111,7 +121,7 @@ class TextEdit extends PureComponent {
 						/>
 					</Box>
 
-					<Button>Save changes</Button>
+					<Button onClick={this.saveChanges}>Save changes</Button>
 				</Box>
 			</Box>
 		);

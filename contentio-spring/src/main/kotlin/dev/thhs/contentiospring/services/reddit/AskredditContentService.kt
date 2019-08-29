@@ -176,8 +176,18 @@ class AskredditContentService(val redditApi: RedditApiService,
         return ProcessedSubmission.Valid(comment, statement)
     }
 
+
+    fun createSentences(statement: Statement) = launch {
+        log.info("Creting sentences...")
+        prepareSentences(statement)
+        val sentences = sentenceRepository.findSentencesByStatementId(statement.id)
+        mediaGenerator.generateMedia(sentences)
+        videoService2.initSentenceVideos(sentences)
+        log.info("Creating sentences done!")
+    }
+
     suspend fun prepareSentences(statement: Statement): Float {
-        val sentencesData = nlpApi.textToSentences(statement.originalText)
+        val sentencesData = nlpApi.textToSentences(statement.editedText)
         val estimatedStatementDuration = estimateSpeechDuration(sentencesData.wordCount)
         val sentences = sentencesData.sentences.mapIndexed { index, it ->
             val predictedSentenceDuration = estimateSpeechDuration(it.wordCount)
@@ -188,8 +198,8 @@ class AskredditContentService(val redditApi: RedditApiService,
     }
 
     fun estimateSpeechDuration(wordCount: Int): Float {
-        val talkSpeed = 2f
-        return wordCount.toFloat() / talkSpeed
+        val talkSpeedInWordsPerSec = 2f
+        return wordCount.toFloat() / talkSpeedInWordsPerSec
     }
 }
 

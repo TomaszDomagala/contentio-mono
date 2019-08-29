@@ -47,9 +47,28 @@ class MediaGenerator(
         get() = job + Dispatchers.Default
 
 
+    fun clearSentencesMedia(sentences: List<Sentence>) {
+        sentences.forEach {
+            val slide = File(it.slidePath)
+            val audio = File(it.audioPath)
+            val video = File(it.videoPath)
+            if (slide.exists()) slide.delete()
+            if (audio.exists()) audio.delete()
+            if (video.exists()) video.delete()
+            it.slidePath = ""
+            it.audioPath = ""
+            it.videoPath = ""
+            sentenceRepository.save(it)
+        }
+    }
+
     suspend fun generateMedia(project: AskredditProject) = coroutineScope {
-        val workersNum = NumberOfWorkers.MediaGenerator.number
         val sentences = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id)
+        generateMedia(sentences)
+    }
+
+    suspend fun generateMedia(sentences: List<Sentence>) = coroutineScope {
+        val workersNum = NumberOfWorkers.MediaGenerator.number
         val mediaRequests = Channel<MediaRequest>(2 * workersNum)
         repeat(workersNum) {
             mediaWorker(mediaRequests, it)
