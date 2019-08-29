@@ -6,6 +6,12 @@ import {
 	SET_CURRENT_SENTENCE
 } from "./types";
 
+export const changeSubmissionText = (submissionId,newText)=>{
+	return async dispatch => {
+		axios.put(`${apiUrl}/submissions/${submissionId}/text`)
+	}
+}
+
 export const fetchSubmissionDetails = submissionId => {
 	return async dispatch => {
 		const submissionReq = axios.get(

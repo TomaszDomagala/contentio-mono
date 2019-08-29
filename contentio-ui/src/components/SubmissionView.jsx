@@ -1,6 +1,7 @@
 import React, { Component, PureComponent } from "react";
 import { Box, Flex, Card, Text, Heading, Image, Button } from "rebass";
 import { Label, Textarea } from "@rebass/forms";
+import {PrimaryButton} from "../containers/Buttons"
 import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
@@ -105,7 +106,7 @@ class TextEdit extends PureComponent {
 
 		return (
 			<Box mt={3}>
-				<Button onClick={this.toggleShow}>{toggleText}</Button>
+				<PrimaryButton onClick={this.toggleShow}>{toggleText}</PrimaryButton>
 				<Box style={hidden ? { display: "none" } : {}}>
 					<Box my={2}>
 						<Label htmlFor="edittext">
@@ -121,7 +122,7 @@ class TextEdit extends PureComponent {
 						/>
 					</Box>
 
-					<Button onClick={this.saveChanges}>Save changes</Button>
+					<PrimaryButton onClick={this.saveChanges}>Save changes</PrimaryButton>
 				</Box>
 			</Box>
 		);
