@@ -1,9 +1,11 @@
 import React, { Component, PureComponent } from "react";
-import { Box, Flex, Card, Text, Heading, Image } from "rebass";
+import { Box, Flex, Card, Text, Heading, Image, Button } from "rebass";
+import { Label, Textarea } from "@rebass/forms";
 import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
 import { apiUrl } from "../utils/urls";
+import axios from "axios";
 import { formatSec } from "../utils/formatting";
 import { IconContext } from "react-icons";
 import {
@@ -27,8 +29,17 @@ class SubmissionView extends PureComponent {
 
 		return (
 			<Flex justifyContent="center">
-				<Box width={[1, 1 / 2]} bg="background2">
-					<Text color="text2">SubmissionView.jsx</Text>
+				<Card
+					p={2}
+					m={[1, 0]}
+					width={[1, 1 / 2]}
+					bg="background2"
+					borderColor="divider"
+					borderStyle="solid"
+					border={1}
+					borderRadius={8}
+				>
+					<Text color="text2">{JSON.stringify(details.id)}</Text>
 					<ReactResizeDetector handleWidth>
 						<SentenceSlide
 							sentence={sentences[sentenceView.currentIndex]}
@@ -37,16 +48,19 @@ class SubmissionView extends PureComponent {
 							setCurrentSentence={setCurrentSentence}
 						/>
 					</ReactResizeDetector>
-
-					<Text color="text2">Hello</Text>
-				</Box>
+					<TextEdit
+						submissionId={details.id}
+						initialText={details.editedText}
+						key={details.id}
+					/>
+				</Card>
 			</Flex>
 		);
 	}
 }
 
 const mapStateToProps = ({ submissionViewReducer }) => ({
-	details: submissionViewReducer.details,
+	details: submissionViewReducer.submissionDetails,
 	sentences: submissionViewReducer.sentences,
 	sentenceView: submissionViewReducer.sentenceView
 });
@@ -58,6 +72,61 @@ export default connect(
 	mapStateToProps,
 	mapDispatchToProps
 )(SubmissionView);
+
+class TextEdit extends PureComponent {
+	state = {
+		hidden: true,
+		text: this.props.initialText
+	};
+
+	constructor(props) {
+		super(props);
+		this.toggleShow = this.toggleShow.bind(this);
+		this.handleTextChange = this.handleTextChange.bind(this);
+		this.saveChanges = this.saveChanges.bind(this);
+	}
+
+	toggleShow() {
+		this.setState({ hidden: !this.state.hidden });
+	}
+	handleTextChange(event) {
+		this.setState({ text: event.target.value });
+	}
+	async saveChanges() {
+		const res = await axios.put(
+			`${apiUrl}/submissions/${this.props.submissionId}/text`,
+			{ newText: this.state.text }
+		);
+		console.log(res);
+	}
+	render() {
+		const { hidden, text } = this.state;
+		const toggleText = hidden ? "Edit text" : "Hide";
+
+		return (
+			<Box mt={3}>
+				<Button onClick={this.toggleShow}>{toggleText}</Button>
+				<Box style={hidden ? { display: "none" } : {}}>
+					<Box my={2}>
+						<Label htmlFor="edittext">
+							<Text color="text2">Statement text</Text>
+						</Label>
+						<Textarea
+							color="white"
+							value={text}
+							onChange={this.handleTextChange}
+							id="edittext"
+							name="edittext"
+							style={{ minHeight: "300px", resize: "vertical" }}
+						/>
+					</Box>
+
+					<Button onClick={this.saveChanges}>Save changes</Button>
+				</Box>
+			</Box>
+		);
+	}
+}
 
 class SentenceSlide extends PureComponent {
 	constructor(props) {
@@ -130,7 +199,7 @@ const SlideButton = ({ direction, disabled, onClick }) => {
 	}
 	const visibility = disabled ? "hidden" : "visible";
 	return (
-		<Flex
+		<Button
 			flexDirection="column"
 			justifyContent="center"
 			width={[1 / 7, 1 / 16]}
@@ -143,6 +212,6 @@ const SlideButton = ({ direction, disabled, onClick }) => {
 					{icon}
 				</IconContext.Provider>
 			</Text>
-		</Flex>
+		</Button>
 	);
 };

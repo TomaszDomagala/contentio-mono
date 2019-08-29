@@ -2,18 +2,24 @@ import axios from "axios";
 import {
 	SET_PROJECT_DETAILS,
 	CLEAR_PROJECT_DETAILS,
+	SET_PROJECT_MEDIA_STATUS
 } from "./types";
 import { fetchSubmissionDetails } from "../submissionview/actions";
 import { apiUrl } from "../../utils/urls";
 
 export const fetchProjectDetails = projectId => {
 	return async dispatch => {
-		const { data: project } = await axios.get(
-			`${apiUrl}/ui/projects/${projectId}`
+		const detailsReq = axios.get(`${apiUrl}/ui/projects/${projectId}`);
+		const mediaStatusReq = axios.get(
+			`${apiUrl}/projects/${projectId}/mediastatus`
 		);
-		dispatch(setProjectDetails(project));
-
-		const { id: submissionId } = project.submissions.find(
+		const [{ data: details }, { data: mediaStatus }] = await Promise.all([
+			detailsReq,
+			mediaStatusReq
+		]);
+		dispatch(setProjectDetails(details));
+		dispatch(setProjectMediaStatus(mediaStatus));
+		const { id: submissionId } = details.submissions.find(
 			subm => subm.orderInProject === 0
 		);
 		dispatch(fetchSubmissionDetails(submissionId));
@@ -23,6 +29,11 @@ export const fetchProjectDetails = projectId => {
 export const setProjectDetails = details => ({
 	type: SET_PROJECT_DETAILS,
 	payload: details
+});
+
+export const setProjectMediaStatus = mediaStatus => ({
+	type: SET_PROJECT_MEDIA_STATUS,
+	payload: mediaStatus
 });
 
 export const clearProjectDetails = () => ({

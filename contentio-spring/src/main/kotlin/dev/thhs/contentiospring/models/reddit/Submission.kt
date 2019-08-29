@@ -29,6 +29,7 @@ data class Submission(
 
         @Column(name = "_type")
         val type: SubmissionType,
+        var ignore: Boolean = false,
 
         @OneToOne(cascade = [CascadeType.ALL])
         @JoinColumn(name = "statement_id", referencedColumnName = "id")

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface SentenceRepository : JpaRepository<Sentence, Long> {
+    fun findSentencesByStatementId(statementId:Long): List<Sentence>
 
     fun findSentencesByStatementSubmissionId(submissionId: String): List<Sentence>
 

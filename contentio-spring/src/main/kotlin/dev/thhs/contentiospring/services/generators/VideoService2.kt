@@ -166,6 +166,17 @@ class VideoService2(
         return Clip.Video(File(workingDir, "$fileName.mp4"))
     }
 
+
+    suspend fun initSentenceVideos(sentences: List<Sentence>) = coroutineScope {
+        val videoRequests = sentences.map { it.createVideoRequest() }
+        val validRequests = videoRequests.filterIsInstance<SentenceVideoData.Valid>()
+        if (validRequests.size != videoRequests.size) {
+            log.error("Missing assets in sentences")
+            return@coroutineScope
+        }
+        createSentenceVideos(validRequests)
+    }
+
     private suspend fun createSentenceVideos(videoRequests: List<SentenceVideoData.Valid>): List<VideoResult> = coroutineScope {
         val videoResults = mutableListOf<VideoResult>()
         val requestChannel = Channel<VideoRequest>()

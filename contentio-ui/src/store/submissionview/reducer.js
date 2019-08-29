@@ -5,7 +5,7 @@ import {
 } from "./types";
 
 const initialState = {
-	details: {},
+	submissionDetails: {},
 	sentences: [],
 	sentenceView: {
 		currentIndex: null,

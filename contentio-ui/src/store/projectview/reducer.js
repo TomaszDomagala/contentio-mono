@@ -1,4 +1,8 @@
-import { SET_PROJECT_DETAILS, CLEAR_PROJECT_DETAILS } from "./types";
+import {
+	SET_PROJECT_DETAILS,
+	CLEAR_PROJECT_DETAILS,
+	SET_PROJECT_MEDIA_STATUS
+} from "./types";
 
 const initialState = {
 	details: {
@@ -6,6 +10,7 @@ const initialState = {
 		predictedDuration: 0,
 		audioDuration: 0
 	},
+	mediaStatus: {},
 	submissions: []
 };
 
@@ -27,6 +32,9 @@ export function projectViewReducer(state = initialState, action) {
 				},
 				submissions
 			};
+		}
+		case SET_PROJECT_MEDIA_STATUS: {
+			return { ...state, mediaStatus: action.payload };
 		}
 		case CLEAR_PROJECT_DETAILS: {
 			return { ...initialState };
