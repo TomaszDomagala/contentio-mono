@@ -31,8 +31,11 @@ const Statement = props => {
 				.replaceAll("</p>", "");
 			return (
 				<Text
-					color={visible ? "white" : "black"}
-					style={{ display: "inline" }}
+					color="white"
+					style={{
+						display: "inline",
+						visibility: visible ? "visible" : "hidden"
+					}}
 					dangerouslySetInnerHTML={{ __html: htmlText }}
 					key={index}
 					{...props}
@@ -43,8 +46,10 @@ const Statement = props => {
 
 	return (
 		<Box bg="black" style={{ float: "left" }}>
-			{sentencesToParagraphs(sentences).map((sent,i) => (
-				<Box key={i} pb={2}>{mapSentencesToText(sent, slide, props)}</Box>
+			{sentencesToParagraphs(sentences).map((sent, i) => (
+				<Box key={i} pb={2}>
+					{mapSentencesToText(sent, slide, props)}
+				</Box>
 			))}
 		</Box>
 	);
