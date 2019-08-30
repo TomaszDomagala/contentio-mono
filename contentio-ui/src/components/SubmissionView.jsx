@@ -1,7 +1,7 @@
 import React, { Component, PureComponent } from "react";
 import { Box, Flex, Card, Text, Heading, Image, Button } from "rebass";
 import { Label, Textarea } from "@rebass/forms";
-import {PrimaryButton} from "../containers/Buttons"
+import { PrimaryButton, OutlineButton } from "../containers/Buttons";
 import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
@@ -94,6 +94,7 @@ class TextEdit extends PureComponent {
 		this.setState({ text: event.target.value });
 	}
 	async saveChanges() {
+		if (this.state.text === this.props.initialText) return;
 		const res = await axios.put(
 			`${apiUrl}/submissions/${this.props.submissionId}/text`,
 			{ newText: this.state.text }
@@ -106,7 +107,9 @@ class TextEdit extends PureComponent {
 
 		return (
 			<Box mt={3}>
-				<PrimaryButton onClick={this.toggleShow}>{toggleText}</PrimaryButton>
+				<OutlineButton onClick={this.toggleShow}>
+					{toggleText}
+				</OutlineButton>
 				<Box style={hidden ? { display: "none" } : {}}>
 					<Box my={2}>
 						<Label htmlFor="edittext">
@@ -122,7 +125,9 @@ class TextEdit extends PureComponent {
 						/>
 					</Box>
 
-					<PrimaryButton onClick={this.saveChanges}>Save changes</PrimaryButton>
+					<PrimaryButton onClick={this.saveChanges}>
+						Save changes
+					</PrimaryButton>
 				</Box>
 			</Box>
 		);
