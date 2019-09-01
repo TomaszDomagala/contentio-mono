@@ -3,6 +3,8 @@ package dev.thhs.contentiospring.services.generators
 import dev.thhs.contentiospring.models.Sentence
 import dev.thhs.contentiospring.models.askreddit.AskredditProject
 import dev.thhs.contentiospring.models.exceptions.FfmpegFailure
+import dev.thhs.contentiospring.models.reddit.Submission
+import dev.thhs.contentiospring.models.reddit.SubmissionType
 import dev.thhs.contentiospring.models.webrequests.InitProjectVideoRequest
 import dev.thhs.contentiospring.models.webrequests.InitProjectVideoResponse
 import dev.thhs.contentiospring.repositories.AskredditProjectRepository
@@ -69,36 +71,30 @@ class VideoService2(
         } catch (err: NoSuchElementException) {
             return InitProjectVideoResponse.Failure.ProjectNotFound
         }
-        val sentences = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id)
-        val videoRequests = sentences.map { it.createVideoRequest() }
-
-        val failures = videoRequests.filterIsInstance<SentenceVideoData.Invalid>()
-        if (failures.isNotEmpty()) return InitProjectVideoResponse.Failure.MissingAssets(failures)
-
         launch {
-            createProjectVideo(project, videoRequests as List<SentenceVideoData.Valid>)
+            createProjectVideo(project)
         }
         return InitProjectVideoResponse.Success
     }
 
-    private suspend fun createProjectVideo(project: AskredditProject, videoRequests: List<SentenceVideoData.Valid>) = coroutineScope {
-        log.info("Creating sentence videos...")
-        val results = createSentenceVideos(videoRequests)
-        val failures = results.filterIsInstance<VideoResult.Failure>()
-        if (failures.isNotEmpty()) {
-            log.error("Not all sentence videos generated")
+    private suspend fun createProjectVideo(project: AskredditProject) = coroutineScope {
+        log.info("Checking sentence videos...")
+        val videos = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { File(it.videoPath) }
+        if (videos.any { !it.exists() }) {
+            log.error("Not all sentences have video generated")
             return@coroutineScope
         }
-        log.info("Sentence videos created!")
+        log.info("Done!")
         val workingDir = File(project.projectPath, "Product")
         workingDir.mkdirs()
 
-        val orderedSubmissions = submissionRepository.findSubmissionsByProjectId(project.id).sortedBy { it.orderInProject }
+//        val orderedSubmissions = submissionRepository.findSubmissionsByProjectId(project.id).filter { !it.ignore }.sortedBy { it.orderInProject }
+        val orderedSubmissions = submissionsOrderInVideo(project).filter { !it.ignore }
         val interlude = File(VideoService2::class.java.getResource("/media/no_signal.mp4").toURI())
         val submissionVideos: List<List<File>> = orderedSubmissions.map { submission ->
             sentenceRepository.findSentencesByStatementSubmissionId(submission.id).map { File(it.videoPath) }
         }
-        val clips: List<Clip.Video> = submissionVideos.flatMap { listOf(it, listOf(interlude)) }.flatten().map { Clip.Video(it) }
+        val clips: List<Clip.Video> = submissionVideos.flatMap { listOf(it, listOf(interlude)) }.flatten().map { Clip.Video(it) }.dropLast(1)
         log.info("Creating raw video...")
         val rawVideo = concatClipsWithConcatFilter(clips, workingDir, "video_no_background,.mp4")
         log.info("Raw video created!")
@@ -110,6 +106,14 @@ class VideoService2(
         log.info("Video ready! ${video.file.absolutePath}")
     }
 
+    fun submissionsOrderInVideo(project: AskredditProject): List<Submission> {
+        val submissions = submissionRepository.findSubmissionsByProjectId(project.id)
+        val postAndComments = submissions.partition { it.type == SubmissionType.POST }
+        val shuffledComments = postAndComments.second.shuffled().toMutableList()
+        shuffledComments.addAll(0, postAndComments.first)
+        return shuffledComments
+    }
+
     private fun addBackgroundMusic(video: Clip.Video, music: Clip.Audio, workingDir: File, fileName: String = "video"): Clip.Video {
         val tempAudioClips = List(15) { music }
         val backgroundMusic = concatClips(tempAudioClips, workingDir, ClipExtension.Audio, "background_music")
@@ -119,9 +123,9 @@ class VideoService2(
         val audioFromVideo = "audio_from_video.aac"
         val audioWithMusic = "audio_with_music.mp3"
 
-        val exportAudioCommand = "ffmpeg -i $videoPath -vn -acodec copy $audioFromVideo"
-        val margeAudioCommand = "ffmpeg -i $audioFromVideo -i $musicPath -filter_complex amix=inputs=2:duration=shortest $audioWithMusic"
-        val replaceAudioCommand = "ffmpeg -i $videoPath -i $audioWithMusic -c:v copy -map 0:v:0 -map 1:a:0 $fileName.mp4"
+        val exportAudioCommand = "ffmpeg -y -i $videoPath -vn -acodec copy $audioFromVideo"
+        val margeAudioCommand = "ffmpeg -y -i $audioFromVideo -i $musicPath -filter_complex amix=inputs=2:duration=shortest $audioWithMusic"
+        val replaceAudioCommand = "ffmpeg -y -i $videoPath -i $audioWithMusic -c:v copy -map 0:v:0 -map 1:a:0 $fileName.mp4"
 
         runFfmpegCommand(exportAudioCommand, workingDir)
         runFfmpegCommand(margeAudioCommand, workingDir)
@@ -139,7 +143,7 @@ class VideoService2(
     ): T {
         val inputFile = createConcatInputFile(clips, workingDir, filePrefix)
         val outputName = "${inputFile.nameWithoutExtension}.${extension.value}"
-        val concatCommand = "ffmpeg -f concat -safe 0  -i ${inputFile.name} -c copy $outputName"
+        val concatCommand = "ffmpeg -y -f concat -safe 0  -i ${inputFile.name} -c copy $outputName"
         runFfmpegCommand(concatCommand, workingDir)
         val file = File(workingDir, outputName)
         @Suppress("UNCHECKED_CAST")
@@ -161,7 +165,7 @@ class VideoService2(
     ): Clip.Video {
         val inputs: String = clips.map { it.file.absolutePath }.map { it.replace("\\", "/") }.joinToString(" ") { "-i $it" }
         val channels: String = clips.mapIndexed { index, _ -> "[$index:v:0][$index]" }.joinToString("")
-        val command = "ffmpeg $inputs -filter_complex \"${channels}concat=n=${clips.size}:v=1:a=1[outv][outa]\" -map \"[outv]\" -map \"[outa]\" $fileName.mp4"
+        val command = "ffmpeg -y $inputs -filter_complex \"${channels}concat=n=${clips.size}:v=1:a=1[outv][outa]\" -map \"[outv]\" -map \"[outa]\" $fileName.mp4"
         runFfmpegCommand(command, workingDir)
         return Clip.Video(File(workingDir, "$fileName.mp4"))
     }
@@ -200,7 +204,7 @@ class VideoService2(
     }
 
     private fun SentenceVideoData.Valid.createVideo(): VideoResult {
-        val command = "ffmpeg -i ${slide.unixPath()} -i ${audio.unixPath()} -c:v libx264 -c:a aac -pix_fmt yuv420p $outputName"
+        val command = "ffmpeg -y -i ${slide.unixPath()} -i ${audio.unixPath()} -c:v libx264 -c:a aac -pix_fmt yuv420p $outputName"
         try {
             runFfmpegCommand(command, workingDir)
         } catch (err: FfmpegFailure) {

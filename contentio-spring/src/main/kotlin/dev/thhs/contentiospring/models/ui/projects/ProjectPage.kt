@@ -2,6 +2,7 @@ package dev.thhs.contentiospring.models.ui.projects
 
 
 data class ProjectPage(
+        val id: Long,
         val title: String,
         val predictedDuration: Float,
         val audioDuration: Float,
@@ -13,6 +14,7 @@ data class SubmissionListItem(
         val author: String,
         val score: Int,
         val text: String,
+        val ignore: Boolean,
         val predictedDuration: Float,
         val audioDuration: Float,
         val edited: Boolean,

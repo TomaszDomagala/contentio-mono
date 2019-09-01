@@ -57,11 +57,11 @@ class UiController(
                     .map { sentence -> Pair(sentence.predictedDuration, sentence.audioDuration) }
                     .reduce { acc, next -> Pair(acc.first + next.first, acc.second + next.second) }
 
-            SubmissionListItem(it.id, it.author, it.score, statement.editedText, durations.first, durations.second, edited, it.orderInProject)
+            SubmissionListItem(it.id, it.author, it.score, statement.editedText, statement.submission.ignore, durations.first, durations.second, edited, it.orderInProject)
         }
         val predictedDuration = submissionItems.map { it.predictedDuration }.sum()
-        val audioDuration = submissionItems.map { it.audioDuration }.sum()
-        return ResponseEntity.ok(ProjectPage(post.editedText, predictedDuration, audioDuration, submissionItems))
+        val audioDuration = submissionItems.filter { !it.ignore }.map { it.audioDuration }.sum()
+        return ResponseEntity.ok(ProjectPage(project.id, post.editedText, predictedDuration, audioDuration, submissionItems))
     }
 
     @GetMapping("submissions/{id}")

@@ -39,3 +39,4 @@ export const setProjectMediaStatus = mediaStatus => ({
 export const clearProjectDetails = () => ({
 	type: CLEAR_PROJECT_DETAILS
 });
+
