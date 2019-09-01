@@ -3,19 +3,27 @@ import { Box, Flex, Card, Text, Heading, Image } from "rebass";
 import ReactResizeDetector from "react-resize-detector";
 import { connect } from "react-redux";
 import { setCurrentSentence } from "../store/submissionview/actions";
+import axios from "axios";
 import { apiUrl } from "../utils/urls";
 import { formatSec } from "../utils/formatting";
 import { IconContext } from "react-icons";
+import { PrimaryButton } from "../containers/Buttons";
 import { MdDone, MdInfoOutline } from "react-icons/md";
 
 class ProjectDetails extends PureComponent {
+	constructor(props) {
+		super(props);
+		this.generateVideo = this.generateVideo.bind(this);
+	}
+
+	generateVideo() {
+		axios.post(`${apiUrl}/projects/${this.props.details.id}/initvideo`);
+	}
+
 	render() {
 		const { title, audioDuration } = this.props.details;
 		const { mediaStatus } = this.props;
-		console.log(mediaStatus);
-		const isMediaStatusEmpty =
-			Object.entries(mediaStatus).length === 0 &&
-			mediaStatus.constructor === Object;
+
 		return (
 			<Flex justifyContent="center">
 				<Card
@@ -34,33 +42,10 @@ class ProjectDetails extends PureComponent {
 					<Text color="text2" fontSize={2}>
 						Duration {formatSec(audioDuration)}
 					</Text>
-					{!isMediaStatusEmpty && (
-						<Box>
-							<MediaStatus
-								media="Final video"
-								status={mediaStatus.videoStatus}
-							/>
-							<MediaStatus
-								media="Audio files"
-								status={
-									mediaStatus.sentencesMediaStatus.audioStatus
-								}
-							/>
-							<MediaStatus
-								media="Slide files"
-								status={
-									mediaStatus.sentencesMediaStatus
-										.slidesStatus
-								}
-							/>
-							<MediaStatus
-								media="Video files"
-								status={
-									mediaStatus.sentencesMediaStatus.videoStatus
-								}
-							/>
-						</Box>
-					)}
+					<MediaStatusView mt={2} mediaStatus={mediaStatus} />
+					<PrimaryButton mt={3} onClick={this.generateVideo}>
+						Generate video
+					</PrimaryButton>
 				</Card>
 			</Flex>
 		);
@@ -77,6 +62,37 @@ export default connect(
 	mapStateToProps,
 	mapDispatchToProps
 )(ProjectDetails);
+
+const MediaStatusView = props => {
+	const { mediaStatus } = props;
+	const isMediaStatusEmpty =
+		Object.entries(mediaStatus).length === 0 &&
+		mediaStatus.constructor === Object;
+	return (
+		<>
+			{!isMediaStatusEmpty && (
+				<Box {...props}>
+					<MediaStatus
+						media="Final video"
+						status={mediaStatus.videoStatus}
+					/>
+					<MediaStatus
+						media="Audio files"
+						status={mediaStatus.sentencesMediaStatus.audioStatus}
+					/>
+					<MediaStatus
+						media="Slide files"
+						status={mediaStatus.sentencesMediaStatus.slidesStatus}
+					/>
+					<MediaStatus
+						media="Video files"
+						status={mediaStatus.sentencesMediaStatus.videoStatus}
+					/>
+				</Box>
+			)}
+		</>
+	);
+};
 
 const MediaStatus = ({ media, status }) => {
 	const { generated, missing, all } = status;

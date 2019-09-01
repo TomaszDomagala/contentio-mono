@@ -5,7 +5,9 @@ import dev.thhs.contentiospring.models.Statement
 import dev.thhs.contentiospring.models.SubmissionMediaStatus
 import dev.thhs.contentiospring.models.exceptions.NoStatementFound
 import dev.thhs.contentiospring.models.reddit.Submission
+import dev.thhs.contentiospring.models.webrequests.ApiResponse
 import dev.thhs.contentiospring.models.webrequests.ChangeTextRequest
+import dev.thhs.contentiospring.models.webrequests.IgnoreResponse
 import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
 import dev.thhs.contentiospring.repositories.SubmissionRepository
@@ -64,6 +66,17 @@ class SubmissionsController(
         return ResponseEntity.ok(object {})
     }
 
+    @PostMapping("/{id}/regeneratemedia")
+    fun regenerateSubmissionMedia(@PathVariable id: String): ResponseEntity<*> {
+        val submission = submissionRepository.findById(id).orElseThrow()
+        val statement: Statement = submission?.statement ?: throw NoStatementFound()
+        val sentences = sentenceRepository.findSentencesByStatementSubmissionId(id)
+        mediaGenerator.clearSentencesMedia(sentences)
+        sentenceRepository.deleteAll(sentences)
+        askredditContentService.createSentences(statement)
+        return ResponseEntity.ok(object {})
+    }
+
 
     @GetMapping("/{id}/sentences")
     fun getSubmissionSentences(@PathVariable id: String): List<Sentence> {
@@ -80,4 +93,16 @@ class SubmissionsController(
         return ResponseEntity.ok(mediaStatusService.mediaStatus(submission))
     }
 
+    @PostMapping("/{id}/ignore")
+    fun ignoreSubmission(@PathVariable id: String): ResponseEntity<ApiResponse> {
+        val submission = try {
+            submissionRepository.findById(id).orElseThrow()
+        } catch (err: NoSuchElementException) {
+            return ResponseEntity.notFound().build()
+        }
+        val currentIgnoreState = !submission.ignore
+        submission.ignore = currentIgnoreState
+        submissionRepository.save(submission)
+        return ResponseEntity.ok(IgnoreResponse(currentIgnoreState))
+    }
 }

@@ -53,3 +53,8 @@ export const OutlineButton = styled(BasicButton)`
 		color: white;
 	}
 `;
+
+export const TextButton = styled(BasicButton)`
+	background-color: rgba(0, 0, 0, 0);
+	color: white;
+`;

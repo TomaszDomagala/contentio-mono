@@ -29,11 +29,6 @@ import org.springframework.stereotype.Service
 import javax.annotation.PreDestroy
 
 
-sealed class DurationMsg {
-    data class Get(val response: CompletableDeferred<Float>) : DurationMsg()
-    data class Add(val duration: Float) : DurationMsg()
-}
-
 sealed class RawSubmission(val order: Int) {
     class Post(val postRef: SubmissionReference, order: Int) : RawSubmission(order)
     class Comment(val commentRef: CommentNode<PublicContribution<*>>, order: Int) : RawSubmission(order)
@@ -96,7 +91,7 @@ class AskredditContentService(val redditApi: RedditApiService,
             generateContent(project, true)
             mediaGenerator.generateMedia(project)
             log.info("Creating video...")
-            videoService2.initProjectVideo(InitProjectVideoRequest(project.id))
+            videoService2.initSentenceVideos(sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id))
 //            videoService.generateVideo(project)
             log.info("Generating content end")
         }
@@ -108,8 +103,12 @@ class AskredditContentService(val redditApi: RedditApiService,
         val coreSubmissionRef = redditApi.getSubmissionByUrl(project.url)
         val commentsRoot = coreSubmissionRef.comments(CommentsRequest(sort = CommentSort.TOP, depth = 1))
 
-        var projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id).map { it.audioDuration }.sum()
         var orderInProject = submissionRepository.findSubmissionsByProjectId(project.id).size
+        var projectDuration = sentenceRepository.findSentencesByStatementSubmissionProjectId(project.id)
+                .filter { !it.statement.submission.ignore }
+                .map { it.audioDuration }
+                .sum()
+
 
         val handleSubmissionPreparation: suspend (RawSubmission) -> Unit = { rawSubmission: RawSubmission ->
             when (val preparedSubmission = prepareSubmission(rawSubmission, project)) {
@@ -198,7 +197,7 @@ class AskredditContentService(val redditApi: RedditApiService,
     }
 
     fun estimateSpeechDuration(wordCount: Int): Float {
-        val talkSpeedInWordsPerSec = 2f
+        val talkSpeedInWordsPerSec = 4f
         return wordCount.toFloat() / talkSpeedInWordsPerSec
     }
 }

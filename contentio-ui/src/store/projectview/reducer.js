@@ -6,6 +6,7 @@ import {
 
 const initialState = {
 	details: {
+		id: 0,
 		title: "",
 		predictedDuration: 0,
 		audioDuration: 0
@@ -18,6 +19,7 @@ export function projectViewReducer(state = initialState, action) {
 	switch (action.type) {
 		case SET_PROJECT_DETAILS: {
 			const {
+				id,
 				title,
 				predictedDuration,
 				audioDuration,
@@ -26,6 +28,7 @@ export function projectViewReducer(state = initialState, action) {
 			return {
 				...state,
 				details: {
+					id,
 					title,
 					predictedDuration,
 					audioDuration

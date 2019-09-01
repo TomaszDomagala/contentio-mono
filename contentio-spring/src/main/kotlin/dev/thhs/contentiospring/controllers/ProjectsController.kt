@@ -5,11 +5,14 @@ import dev.thhs.contentiospring.models.askreddit.AskredditProject
 import dev.thhs.contentiospring.models.reddit.Submission
 import dev.thhs.contentiospring.models.webrequests.InitProjectRequest
 import dev.thhs.contentiospring.models.webrequests.InitProjectResponse
+import dev.thhs.contentiospring.models.webrequests.InitProjectVideoRequest
+import dev.thhs.contentiospring.models.webrequests.InitProjectVideoResponse
 import dev.thhs.contentiospring.repositories.AskredditProjectRepository
 import dev.thhs.contentiospring.repositories.SentenceRepository
 import dev.thhs.contentiospring.repositories.StatementRepository
 import dev.thhs.contentiospring.repositories.SubmissionRepository
 import dev.thhs.contentiospring.services.MediaStatusService
+import dev.thhs.contentiospring.services.generators.VideoService2
 import dev.thhs.contentiospring.services.reddit.AskredditContentService
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -25,7 +28,8 @@ class ProjectsController(
         val submissionRepo: SubmissionRepository,
         val sentenceRepository: SentenceRepository,
         val contentService: AskredditContentService,
-        val mediaStatusService: MediaStatusService
+        val mediaStatusService: MediaStatusService,
+        val videoService2: VideoService2
 ) {
 
     @PostMapping("/init")
@@ -66,6 +70,11 @@ class ProjectsController(
             return ResponseEntity.notFound().build()
         }
         return ResponseEntity.ok(mediaStatusService.mediaStatus(project))
+    }
+
+    @PostMapping("/{id}/initvideo")
+    fun initProject(@PathVariable id: Long): InitProjectVideoResponse {
+        return videoService2.initProjectVideo(InitProjectVideoRequest(id))
     }
 
     @DeleteMapping("/{id}")
