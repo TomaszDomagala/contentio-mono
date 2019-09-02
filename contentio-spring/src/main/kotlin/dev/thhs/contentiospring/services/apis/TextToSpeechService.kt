@@ -31,17 +31,20 @@ object TextToSpeechService {
         return audioFile
     }
 
-    private fun clearMarkdownText(text: String): String {
-        val document = parser.parse(text)
+    private fun String.clearMarkdownText(): String {
+        val document = parser.parse(this)
         val html = renderer.render(document)
         return Jsoup.parse(html).text()
     }
 
 
     fun clearTextForReading(text: String): String {
-        return clearMarkdownText(text)
-                .clearFrom("\"")
-                .clearFrom("\'")
+        return text.clearFrom("\"")
+                .clearFrom("“")
+                .clearFrom("”")
+                .clearFrom("‘")
+                .clearFrom("’")
+                .clearMarkdownText()
 
     }
 
