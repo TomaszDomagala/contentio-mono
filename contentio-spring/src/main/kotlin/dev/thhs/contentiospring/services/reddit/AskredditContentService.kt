@@ -172,6 +172,9 @@ class AskredditContentService(val redditApi: RedditApiService,
         val comment = Submission(subject.id, subject.author, subject.score, subject.created, project, order, SubmissionType.COMMENT)
         val statement = Statement(comment, commentText)
         comment.statement = statement
+        if (commentText in listOf("[deleted]", "[removed")) {
+            comment.ignore = true
+        }
         return ProcessedSubmission.Valid(comment, statement)
     }
 
