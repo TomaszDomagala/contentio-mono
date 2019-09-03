@@ -1,0 +1,6 @@
+@font-face {
+	font-family: "RedditFont";
+	src: url(http://127.0.0.1:3030/static/redesignFont.woff) format("woff");
+	font-style: normal;
+	font-weight: normal;
+}

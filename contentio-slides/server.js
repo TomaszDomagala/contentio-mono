@@ -53,7 +53,7 @@ const createScreenshot = async (submissionId, slideNumber) => {
 	// browser = await puppeteer.launch();
 	await app.prepare();
 	const server = express();
-
+	server.use("/static", express.static("fonts"));
 	server.use(bodyParser.urlencoded({ extended: true }));
 	server.use(bodyParser.json());
 
