@@ -26,6 +26,20 @@ const createScreenshot = async (submissionId, slideNumber) => {
 	await page.setViewport({ width: 1920, height: 1080 });
 	const url = `http://127.0.0.1:3030/askreddit/submission/${submissionId}/${slideNumber}`;
 	await page.goto(url);
+	let pageDone = false;
+
+	while (!pageDone) {
+		const { scrollHeight, clientHeight } = await page.evaluate(() => {
+			const content = document.querySelector("#CONTENT");
+			const { scrollHeight, clientHeight } = content;
+			return { scrollHeight, clientHeight };
+		});
+		if (scrollHeight === clientHeight) {
+			pageDone = true;
+		} else {
+			await page.reload();
+		}
+	}
 	const img = await page.screenshot({ encoding: "base64" });
 	await page.close();
 	return img;

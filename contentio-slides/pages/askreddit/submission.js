@@ -4,6 +4,8 @@ import axios from "axios";
 import Answer from "../../components/answer";
 import Question from "../../components/question";
 
+// id="CONTENT" on root submission div is for server.js screenshot checks 
+
 class Submission extends Component {
 	state = {
 		fontInPixels: false,
@@ -72,7 +74,9 @@ class Submission extends Component {
 				/>
 			);
 		return (
-			<div ref={element => (this.contentRef = element)}>{content}</div>
+			<div id="CONTENT" ref={element => (this.contentRef = element)}>
+				{content}
+			</div>
 		);
 	}
 }
