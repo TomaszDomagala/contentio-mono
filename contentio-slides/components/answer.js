@@ -45,6 +45,16 @@ const Answer = ({ submission, sentences, slide, fontSize }) => {
 
 			<Box my={1}>
 				<Flex>
+					<Text
+						mt={1}
+						mr={2}
+						fontFamily="RedditFont"
+						fontWeight="normal"
+						fontSize={fontSize}
+						color={bottomColor}
+					>
+						&#61708;
+					</Text>
 					<IBMText
 						fontWeight="bold"
 						color={bottomColor}
