@@ -56,20 +56,41 @@ const Answer = ({ submission, sentences, slide, fontSize }) => {
 						&#61708;
 					</Text>
 					<IBMText
+						mr={3}
 						fontWeight="bold"
 						color={bottomColor}
 						fontSize={fontSize}
 					>
 						Reply
 					</IBMText>
+					<Text
+						mt={1}
+						mr={2}
+						fontFamily="RedditFont"
+						fontWeight="normal"
+						fontSize={fontSize}
+						color={bottomColor}
+					>
+						&#61748;
+					</Text>
 					<IBMText
+						mr={3}
 						fontWeight="bold"
 						color={bottomColor}
 						fontSize={fontSize}
-						mx={3}
 					>
 						Share
 					</IBMText>
+					<Text
+						mt={1}
+						mr={2}
+						fontFamily="RedditFont"
+						fontWeight="normal"
+						fontSize={fontSize}
+						color={bottomColor}
+					>
+						&#61747;
+					</Text>
 					<IBMText
 						fontWeight="bold"
 						color={bottomColor}

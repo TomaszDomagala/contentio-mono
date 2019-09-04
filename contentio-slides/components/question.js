@@ -55,21 +55,52 @@ const Question = ({ submission, sentences, slide }) => {
 					</Box>
 					<Box mt={2}>
 						<Flex>
+							<Text
+								mt={1}
+								mr={2}
+								fontFamily="RedditFont"
+								fontWeight="normal"
+								fontSize={5}
+								color={bottomColor}
+							>
+								&#61708;
+							</Text>
 							<IBMText
+								mr={3}
 								fontWeight="bold"
 								fontSize={5}
 								color={bottomColor}
 							>
 								Comments
 							</IBMText>
+							<Text
+								mt={1}
+								mr={2}
+								fontFamily="RedditFont"
+								fontWeight="normal"
+								fontSize={5}
+								color={bottomColor}
+							>
+								&#61748;
+							</Text>
 							<IBMText
+								mr={3}
 								fontWeight="bold"
 								fontSize={5}
 								color={bottomColor}
-								mx={3}
 							>
 								Share
 							</IBMText>
+							<Text
+								mt={1}
+								mr={2}
+								fontFamily="RedditFont"
+								fontWeight="normal"
+								fontSize={5}
+								color={bottomColor}
+							>
+								&#61747;
+							</Text>
 							<IBMText
 								fontWeight="bold"
 								fontSize={5}

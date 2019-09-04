@@ -95,15 +95,21 @@ class VideoService2(
             sentenceRepository.findSentencesByStatementSubmissionId(submission.id).map { File(it.videoPath) }
         }
         val clips: List<Clip.Video> = submissionVideos.flatMap { listOf(it, listOf(interlude)) }.flatten().map { Clip.Video(it) }
-        log.info("Creating raw video...")
-        val rawVideo = concatClipsWithConcatFilter(clips, workingDir, "video_no_background,.mp4")
-        log.info("Raw video created!")
-        val backgroundMusic = Clip.Audio(File(VideoService2::class.java.getResource("/media/music.wav").toURI()))
-        log.info("Adding background music...")
-        val video = addBackgroundMusic(rawVideo, backgroundMusic, workingDir, "final_video")
-        project.videoPath = video.file.absolutePath
-        projectRepository.save(project)
-        log.info("Video ready! ${video.file.absolutePath}")
+        try {
+            log.info("Creating raw video...")
+            val rawVideo = concatClipsWithConcatFilter(clips, workingDir, "video_no_background,.mp4")
+            log.info("Raw video created!")
+            val backgroundMusic = Clip.Audio(File(VideoService2::class.java.getResource("/media/music.wav").toURI()))
+            log.info("Adding background music...")
+            val video = addBackgroundMusic(rawVideo, backgroundMusic, workingDir, "final_video")
+            project.videoPath = video.file.absolutePath
+            projectRepository.save(project)
+            log.info("Video ready! ${video.file.absolutePath}")
+        } catch (err: FfmpegFailure) {
+            log.error("Creating video failed. Check for empty audio files")
+            log.error(err.localizedMessage)
+        }
+
     }
 
     fun submissionsOrderInVideo(project: AskredditProject): List<Submission> {
