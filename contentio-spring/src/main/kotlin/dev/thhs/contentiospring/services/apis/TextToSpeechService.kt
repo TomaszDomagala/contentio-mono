@@ -44,6 +44,7 @@ object TextToSpeechService {
                 .clearFrom("”")
                 .clearFrom("‘")
                 .clearFrom("’")
+                .clearFrom("&#x200B;")
                 .clearMarkdownText()
 
     }
